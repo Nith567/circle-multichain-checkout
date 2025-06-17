@@ -300,9 +300,9 @@ export function useCrossChainTransfer() {
       const numericAmount = parseUnits(amount, DEFAULT_DECIMALS)
       
       // Use walletClient for transactions
-      await approveUSDC(walletClient, sourceChainId)
+      await approveUSDC(walletClient as WalletClient<HttpTransport, Chain, Account>, sourceChainId)
       const burnTx = await burnUSDC(
-        walletClient,
+        walletClient as WalletClient<HttpTransport, Chain, Account>,
         sourceChainId,
         numericAmount,
         preferredChainId,
@@ -310,7 +310,7 @@ export function useCrossChainTransfer() {
         "fast"
       )
       const attestation = await retrieveAttestation(burnTx, sourceChainId)
-      const mintTx = await mintUSDC(walletClient, preferredChainId, attestation)
+      const mintTx = await mintUSDC(walletClient as WalletClient<HttpTransport, Chain, Account>, preferredChainId, attestation)
       return { burnTx, mintTx, attestation, sourceChain: sourceChainId, destinationChain: preferredChainId }
     } catch (error) {
       setCurrentStep("error");
