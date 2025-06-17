@@ -1,6 +1,6 @@
 {
   "name": "circle-multichain-checkout",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Universal merchant payment gateway using CCTP V2 CIRCLE",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -36,12 +36,12 @@
     "wagmi": "^2.0.0"
   },
   "devDependencies": {
-"@types/node": "^20.0.0",
-  "@types/react": "^18.3.23",
-  "typescript": "^5.0.0",
-  "next": "^14.0.0",
-  "react": "^18.0.0",
-  "react-dom": "^18.0.0",
-  "wagmi": "^2.0.0"
+    "@types/node": "^20.0.0",
+    "@types/react": "^18.3.23",
+    "typescript": "^5.0.0",
+    "next": "^14.0.0",
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0",
+    "wagmi": "^2.0.0"
   }
 }
