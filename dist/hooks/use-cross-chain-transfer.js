@@ -38,10 +38,10 @@ const chains = {
 export function useCrossChainTransfer() {
     const { data: walletClient } = useWalletClient();
     const publicClient = usePublicClient();
+    const { switchChainAsync } = useSwitchChain();
     const [currentStep, setCurrentStep] = useState("idle");
     const [logs, setLogs] = useState([]);
     const [error, setError] = useState(null);
-    const { switchChainAsync } = useSwitchChain();
     const DEFAULT_DECIMALS = 6;
     const addLog = (message) => setLogs((prev) => [
         ...prev,

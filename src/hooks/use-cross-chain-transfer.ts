@@ -69,7 +69,6 @@ const chains: Record<ChainId, Chain> = {
 export function useCrossChainTransfer() {
   const { data: walletClient } = useWalletClient()
   const publicClient = usePublicClient()
-  const { switchChainAsync } = useSwitchChain()
   const [currentStep, setCurrentStep] = useState<TransferStep>("idle");
   const [logs, setLogs] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -224,9 +223,7 @@ export function useCrossChainTransfer() {
 
     while (retries < MAX_RETRIES) {
       try {
-        await switchChainAsync({ chainId: destinationChainId })
-
-
+        await client.switchChain({id:destinationChainId})
 
         const publicClient =await getPublicClient(destinationChainId as ChainId);
         const feeData = await publicClient.estimateFeesPerGas();
