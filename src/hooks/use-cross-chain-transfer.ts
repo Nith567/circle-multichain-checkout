@@ -225,9 +225,8 @@ export function useCrossChainTransfer() {
     while (retries < MAX_RETRIES) {
       try {
         await switchChainAsync({ chainId: destinationChainId })
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-
         const { data: newWalletClient } = await useWalletClient({ chainId: destinationChainId });
+
 
         const publicClient =await getPublicClient(destinationChainId as ChainId);
         const feeData = await publicClient.estimateFeesPerGas();
