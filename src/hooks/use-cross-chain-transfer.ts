@@ -224,7 +224,11 @@ export function useCrossChainTransfer() {
 
     while (retries < MAX_RETRIES) {
       try {
-        // await switchChainAsync({ chainId: destinationChainId })
+        await switchChainAsync({ chainId: destinationChainId })
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+
+        const { data: newWalletClient } = await useWalletClient({ chainId: destinationChainId });
+
         const publicClient =await getPublicClient(destinationChainId as ChainId);
         const feeData = await publicClient.estimateFeesPerGas();
         const contractConfig = {
@@ -257,7 +261,7 @@ export function useCrossChainTransfer() {
         const gasWithBuffer = (gasEstimate * 120n) / 100n;
         addLog(`Gas Used: ${formatUnits(gasWithBuffer, 9)} Gwei`);
 
-        const tx = await client.sendTransaction({
+        const tx = await newWalletClient?.sendTransaction({
           to: contractConfig.address,
           data: encodeFunctionData({
             ...contractConfig,
