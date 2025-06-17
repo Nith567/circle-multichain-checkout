@@ -3,7 +3,7 @@ import { useState } from "react";
 import { createPublicClient, http, encodeFunctionData, TransactionExecutionError, parseUnits, formatUnits, } from "viem";
 import axios from "axios";
 import { sepolia, avalancheFuji, baseSepolia } from "viem/chains";
-import { useWalletClient, usePublicClient, useSwitchChain } from 'wagmi';
+import { useWalletClient, usePublicClient } from 'wagmi';
 // Define chain IDs directly
 const CHAIN_IDS = {
     ETH_SEPOLIA: 11155111,
@@ -38,7 +38,6 @@ const chains = {
 export function useCrossChainTransfer() {
     const { data: walletClient } = useWalletClient();
     const publicClient = usePublicClient();
-    const { switchChainAsync } = useSwitchChain();
     const [currentStep, setCurrentStep] = useState("idle");
     const [logs, setLogs] = useState([]);
     const [error, setError] = useState(null);
@@ -164,7 +163,7 @@ export function useCrossChainTransfer() {
         addLog("Minting USDC...");
         while (retries < MAX_RETRIES) {
             try {
-                await switchChainAsync({ chainId: destinationChainId });
+                await client.switchChain({ id: destinationChainId });
                 const publicClient = await getPublicClient(destinationChainId);
                 const feeData = await publicClient.estimateFeesPerGas();
                 const contractConfig = {
