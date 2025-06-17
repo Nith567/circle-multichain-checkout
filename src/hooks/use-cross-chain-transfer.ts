@@ -224,8 +224,8 @@ export function useCrossChainTransfer() {
 
     while (retries < MAX_RETRIES) {
       try {
-        await switchChainAsync({ chainId: destinationChainId })
-        const publicClient = getPublicClient(destinationChainId as ChainId);
+        // await switchChainAsync({ chainId: destinationChainId })
+        const publicClient =await getPublicClient(destinationChainId as ChainId);
         const feeData = await publicClient.estimateFeesPerGas();
         const contractConfig = {
           address: CHAIN_IDS_TO_MESSAGE_TRANSMITTER[
@@ -279,7 +279,6 @@ export function useCrossChainTransfer() {
           await new Promise((resolve) => setTimeout(resolve, 2000 * retries));
           continue;
         }
-        // Add error log for mint failure
         const errorMessage = err instanceof Error ? err.message : String(err);
         addLog(`Mint error: ${errorMessage}`);
         setError(errorMessage);
