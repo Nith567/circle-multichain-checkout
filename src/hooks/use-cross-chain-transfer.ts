@@ -276,9 +276,14 @@ export function useCrossChainTransfer() {
         if (err instanceof TransactionExecutionError && retries < MAX_RETRIES) {
           retries++;
           addLog(`Retry ${retries}/${MAX_RETRIES}...`);
+          addLog(`Mint error: ${err}`);
           await new Promise((resolve) => setTimeout(resolve, 2000 * retries));
           continue;
         }
+        // Add error log for mint failure
+        const errorMessage = err instanceof Error ? err.message : String(err);
+        addLog(`Mint error: ${errorMessage}`);
+        setError(errorMessage);
         throw err;
       }
     }

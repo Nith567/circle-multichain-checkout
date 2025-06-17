@@ -11,6 +11,7 @@ export declare function useCrossChainTransfer(): {
     error: string | null;
     executeMerchantPayment: (sourceChainId: ChainId, merchantAddress: string, preferredChainId: ChainId, amount: string) => Promise<{
         burnTx: `0x${string}`;
+        mintTx: void;
         attestation: any;
         sourceChain: ChainId;
         destinationChain: ChainId;

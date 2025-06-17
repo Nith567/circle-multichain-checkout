@@ -1,9 +1,9 @@
 "use client";
 import { useState } from "react";
-import { createPublicClient, http, encodeFunctionData, parseUnits, } from "viem";
+import { createPublicClient, http, encodeFunctionData, TransactionExecutionError, parseUnits, formatUnits, } from "viem";
 import axios from "axios";
 import { sepolia, avalancheFuji, baseSepolia } from "viem/chains";
-import { useWalletClient, usePublicClient } from 'wagmi';
+import { useWalletClient, usePublicClient, useSwitchChain } from 'wagmi';
 // Define chain IDs directly
 const CHAIN_IDS = {
     ETH_SEPOLIA: 11155111,
@@ -41,6 +41,7 @@ export function useCrossChainTransfer() {
     const [currentStep, setCurrentStep] = useState("idle");
     const [logs, setLogs] = useState([]);
     const [error, setError] = useState(null);
+    const { switchChainAsync } = useSwitchChain();
     const DEFAULT_DECIMALS = 6;
     const addLog = (message) => setLogs((prev) => [
         ...prev,
@@ -156,6 +157,67 @@ export function useCrossChainTransfer() {
             }
         }
     };
+    const mintUSDC = async (client, destinationChainId, attestation) => {
+        const MAX_RETRIES = 3;
+        let retries = 0;
+        setCurrentStep("minting");
+        addLog("Minting USDC...");
+        while (retries < MAX_RETRIES) {
+            try {
+                await switchChainAsync({ chainId: destinationChainId });
+                const publicClient = getPublicClient(destinationChainId);
+                const feeData = await publicClient.estimateFeesPerGas();
+                const contractConfig = {
+                    address: CHAIN_IDS_TO_MESSAGE_TRANSMITTER[destinationChainId],
+                    abi: [
+                        {
+                            type: "function",
+                            name: "receiveMessage",
+                            stateMutability: "nonpayable",
+                            inputs: [
+                                { name: "message", type: "bytes" },
+                                { name: "attestation", type: "bytes" },
+                            ],
+                            outputs: [],
+                        },
+                    ],
+                };
+                // Estimate gas with buffer
+                const gasEstimate = await publicClient.estimateContractGas({
+                    ...contractConfig,
+                    functionName: "receiveMessage",
+                    args: [attestation.message, attestation.attestation],
+                    account: client.account,
+                });
+                // Add 20% buffer to gas estimate
+                const gasWithBuffer = (gasEstimate * 120n) / 100n;
+                addLog(`Gas Used: ${formatUnits(gasWithBuffer, 9)} Gwei`);
+                const tx = await client.sendTransaction({
+                    to: contractConfig.address,
+                    data: encodeFunctionData({
+                        ...contractConfig,
+                        functionName: "receiveMessage",
+                        args: [attestation.message, attestation.attestation],
+                    }),
+                    gas: gasWithBuffer,
+                    maxFeePerGas: feeData.maxFeePerGas,
+                    maxPriorityFeePerGas: feeData.maxPriorityFeePerGas,
+                });
+                addLog(`Mint Tx: ${tx}`);
+                setCurrentStep("completed");
+                break;
+            }
+            catch (err) {
+                if (err instanceof TransactionExecutionError && retries < MAX_RETRIES) {
+                    retries++;
+                    addLog(`Retry ${retries}/${MAX_RETRIES}...`);
+                    await new Promise((resolve) => setTimeout(resolve, 2000 * retries));
+                    continue;
+                }
+                throw err;
+            }
+        }
+    };
     const executeMerchantPayment = async (sourceChainId, merchantAddress, preferredChainId, amount) => {
         if (!walletClient)
             throw new Error('Wallet not connected');
@@ -164,9 +226,9 @@ export function useCrossChainTransfer() {
             // Use walletClient for transactions
             await approveUSDC(walletClient, sourceChainId);
             const burnTx = await burnUSDC(walletClient, sourceChainId, numericAmount, preferredChainId, merchantAddress, "fast");
-            // Use publicClient for reading chain data
             const attestation = await retrieveAttestation(burnTx, sourceChainId);
-            return { burnTx, attestation, sourceChain: sourceChainId, destinationChain: preferredChainId };
+            const mintTx = await mintUSDC(walletClient, preferredChainId, attestation);
+            return { burnTx, mintTx, attestation, sourceChain: sourceChainId, destinationChain: preferredChainId };
         }
         catch (error) {
             setCurrentStep("error");
