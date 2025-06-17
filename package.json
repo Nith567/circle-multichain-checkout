@@ -1,6 +1,6 @@
 {
   "name": "circle-multichain-checkout",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "Universal merchant payment gateway using CCTP V2 CIRCLE",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
