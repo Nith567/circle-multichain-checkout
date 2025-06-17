@@ -69,11 +69,11 @@ const chains: Record<ChainId, Chain> = {
 export function useCrossChainTransfer() {
   const { data: walletClient } = useWalletClient()
   const publicClient = usePublicClient()
+  const { switchChainAsync } = useSwitchChain()
   const [currentStep, setCurrentStep] = useState<TransferStep>("idle");
   const [logs, setLogs] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
 
-  const { switchChainAsync } = useSwitchChain()
   const DEFAULT_DECIMALS = 6;
 
   const addLog = (message: string) =>
