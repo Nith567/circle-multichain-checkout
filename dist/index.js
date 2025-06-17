@@ -1,4 +1,4 @@
-export { CheckoutPage } from './components/CheckoutPage';
+export { CheckoutPage } from './components/CheckoutPage.js';
 export { useCrossChainTransfer } from './hooks/use-cross-chain-transfer';
 // Export UI components
 export { Card, CardHeader, CardTitle, CardContent } from './components/ui/card';

@@ -1,4 +1,4 @@
-export { CheckoutPage } from './components/CheckoutPage';
+export { CheckoutPage } from './components/CheckoutPage.js';
 export { useCrossChainTransfer } from './hooks/use-cross-chain-transfer';
 export type { ChainId, TransferStep } from './hooks/use-cross-chain-transfer';
 export type { CheckoutPageProps } from './components/CheckoutPage';
