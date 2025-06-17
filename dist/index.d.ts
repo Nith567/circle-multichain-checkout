@@ -1,7 +1,7 @@
 export { CheckoutPage } from './components/CheckoutPage.js';
-export { useCrossChainTransfer } from './hooks/use-cross-chain-transfer';
-export type { ChainId, TransferStep } from './hooks/use-cross-chain-transfer';
-export type { CheckoutPageProps } from './components/CheckoutPage';
+export { useCrossChainTransfer } from './hooks/use-cross-chain-transfer.js';
+export type { ChainId, TransferStep } from './hooks/use-cross-chain-transfer.js';
+export type { CheckoutPageProps } from './components/CheckoutPage.js';
 export { Card, CardHeader, CardTitle, CardContent } from './components/ui/card';
 export { Input } from './components/ui/input';
 export { Label } from './components/ui/label';
