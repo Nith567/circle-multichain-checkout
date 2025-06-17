@@ -275,8 +275,7 @@ export function useCrossChainTransfer() {
       } catch (err) {
         if (err instanceof TransactionExecutionError && retries < MAX_RETRIES) {
           retries++;
-          addLog(`Retry ${retries}/${MAX_RETRIES}...`);
-          addLog(`Mint error: ${err}`);
+          addLog(`Retry err: ${err} ${retries}/${MAX_RETRIES}...`);
           await new Promise((resolve) => setTimeout(resolve, 2000 * retries));
           continue;
         }
