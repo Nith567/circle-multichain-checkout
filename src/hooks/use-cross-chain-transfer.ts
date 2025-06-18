@@ -69,6 +69,7 @@ const chains: Record<ChainId, Chain> = {
 export function useCrossChainTransfer() {
   const { data: walletClient } = useWalletClient()
   const publicClient = usePublicClient()
+  const { switchChain } = useSwitchChain();
   const [currentStep, setCurrentStep] = useState<TransferStep>("idle");
   const [logs, setLogs] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -311,6 +312,10 @@ export function useCrossChainTransfer() {
         "fast"
       )
       const attestation = await retrieveAttestation(burnTx, sourceChainId)
+      if (walletClient.chain.id !== preferredChainId) {
+        await switchChain({ chainId: preferredChainId });
+        return;
+      }
       const mintTx = await mintUSDC(walletClient as WalletClient<HttpTransport, Chain, Account>, preferredChainId, attestation)
       return { burnTx, mintTx, attestation, sourceChain: sourceChainId, destinationChain: preferredChainId }
     } catch (error) {
