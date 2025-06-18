@@ -3,7 +3,7 @@ import { useState } from "react";
 import { createPublicClient, http, encodeFunctionData, TransactionExecutionError, parseUnits, formatUnits, } from "viem";
 import axios from "axios";
 import { sepolia, avalancheFuji, baseSepolia } from "viem/chains";
-import { useWalletClient, usePublicClient } from 'wagmi';
+import { useWalletClient, usePublicClient, useSwitchChain } from 'wagmi';
 // Define chain IDs directly
 const CHAIN_IDS = {
     ETH_SEPOLIA: 11155111,
@@ -38,6 +38,7 @@ const chains = {
 export function useCrossChainTransfer() {
     const { data: walletClient } = useWalletClient();
     const publicClient = usePublicClient();
+    const { switchChain } = useSwitchChain();
     const [currentStep, setCurrentStep] = useState("idle");
     const [logs, setLogs] = useState([]);
     const [error, setError] = useState(null);
@@ -232,6 +233,10 @@ export function useCrossChainTransfer() {
             await approveUSDC(walletClient, sourceChainId);
             const burnTx = await burnUSDC(walletClient, sourceChainId, numericAmount, preferredChainId, merchantAddress, "fast");
             const attestation = await retrieveAttestation(burnTx, sourceChainId);
+            if (walletClient.chain.id !== preferredChainId) {
+                await switchChain({ chainId: preferredChainId });
+                return;
+            }
             const mintTx = await mintUSDC(walletClient, preferredChainId, attestation);
             return { burnTx, mintTx, attestation, sourceChain: sourceChainId, destinationChain: preferredChainId };
         }
