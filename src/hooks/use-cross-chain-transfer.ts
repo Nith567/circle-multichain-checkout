@@ -257,9 +257,8 @@ export function useCrossChainTransfer() {
         // Add 20% buffer to gas estimate
         const gasWithBuffer = (gasEstimate * 120n) / 100n;
         addLog(`Gas Used: ${formatUnits(gasWithBuffer, 9)} Gwei`);
-        const chainId = await client.getChainId()
-        await client.switchChain({id:destinationChainId})
-        addLog(`so here before tnx Chain ID: ${chainId}`);
+        await switchChain({ chainId: destinationChainId });
+        addLog(`Switching to chain: ${destinationChainId}`);
         const tx = await client.sendTransaction({
           to: contractConfig.address,
           data: encodeFunctionData({
@@ -312,7 +311,6 @@ export function useCrossChainTransfer() {
         "fast"
       )
       const attestation = await retrieveAttestation(burnTx, sourceChainId)
-      await walletClient.switchChain({id:preferredChainId})
       const mintTx = await mintUSDC(walletClient as WalletClient<HttpTransport, Chain, Account>, preferredChainId, attestation)
       return { burnTx, mintTx, attestation, sourceChain: sourceChainId, destinationChain: preferredChainId }
     } catch (error) {
