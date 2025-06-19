@@ -232,6 +232,7 @@ export function useCrossChainTransfer() {
             await approveUSDC(walletClient, sourceChainId);
             const burnTx = await burnUSDC(walletClient, sourceChainId, numericAmount, preferredChainId, merchantAddress, "fast");
             const attestation = await retrieveAttestation(burnTx, sourceChainId);
+            await walletClient.switchChain({ id: preferredChainId });
             const mintTx = await mintUSDC(walletClient, preferredChainId, attestation);
             return { burnTx, mintTx, attestation, sourceChain: sourceChainId, destinationChain: preferredChainId };
         }
