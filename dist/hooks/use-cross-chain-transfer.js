@@ -164,7 +164,6 @@ export function useCrossChainTransfer() {
         addLog("Minting USDC...");
         while (retries < MAX_RETRIES) {
             try {
-                await client.switchChain({ id: destinationChainId });
                 const publicClient = await getPublicClient(destinationChainId);
                 const feeData = await publicClient.estimateFeesPerGas();
                 const contractConfig = {
@@ -233,10 +232,6 @@ export function useCrossChainTransfer() {
             await approveUSDC(walletClient, sourceChainId);
             const burnTx = await burnUSDC(walletClient, sourceChainId, numericAmount, preferredChainId, merchantAddress, "fast");
             const attestation = await retrieveAttestation(burnTx, sourceChainId);
-            if (walletClient.chain.id !== preferredChainId) {
-                await switchChain({ chainId: preferredChainId });
-                return;
-            }
             const mintTx = await mintUSDC(walletClient, preferredChainId, attestation);
             return { burnTx, mintTx, attestation, sourceChain: sourceChainId, destinationChain: preferredChainId };
         }
