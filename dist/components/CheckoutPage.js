@@ -25,7 +25,8 @@ export function CheckoutPage({ merchantAddress, preferredChain, amount, onSucces
         }
         try {
             const result = await executeMerchantPayment(sourceChain, merchantAddress, preferredChain, amount);
-            onSuccess?.(result.burnTx);
+            onSuccess?.(result?.burnTx || 'it didnt burn bro');
+            onSuccess?.(result?.mintTx || 'it didnt mint bro');
         }
         catch (error) {
             onError?.(error instanceof Error ? error : new Error('Payment failed'));

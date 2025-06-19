@@ -224,7 +224,7 @@ export function useCrossChainTransfer() {
 
     while (retries < MAX_RETRIES) {
       try {
-        await client.switchChain({id:destinationChainId})
+
 
         const publicClient =await getPublicClient(destinationChainId as ChainId);
         const feeData = await publicClient.estimateFeesPerGas();
@@ -312,10 +312,7 @@ export function useCrossChainTransfer() {
         "fast"
       )
       const attestation = await retrieveAttestation(burnTx, sourceChainId)
-      if (walletClient.chain.id !== preferredChainId) {
-        await switchChain({ chainId: preferredChainId });
-        return;
-      }
+
       const mintTx = await mintUSDC(walletClient as WalletClient<HttpTransport, Chain, Account>, preferredChainId, attestation)
       return { burnTx, mintTx, attestation, sourceChain: sourceChainId, destinationChain: preferredChainId }
     } catch (error) {
