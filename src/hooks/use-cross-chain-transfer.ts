@@ -15,14 +15,19 @@ import {
   formatUnits,
 } from "viem";
 import axios from "axios";
-import { sepolia, avalancheFuji, baseSepolia } from "viem/chains";
+import { sepolia, avalancheFuji, baseSepolia, arbitrumSepolia, worldchainSepolia, sonicBlazeTestnet, lineaSepolia } from "viem/chains";
 import { useWalletClient, usePublicClient, useSwitchChain } from 'wagmi'
+import { SupportedChainId } from "@/lib/constants";
 
 // Define chain IDs directly
 const CHAIN_IDS = {
   ETH_SEPOLIA: 11155111,
   AVAX_FUJI: 43113,
   BASE_SEPOLIA: 84532,
+  SONIC_BLAZE: 161,
+  LINEA_SEPOLIA: 59144,
+  ARBITRUM_SEPOLIA: 421614,
+  WORLDCHAIN_SEPOLIA: 1666700000,
 } as const;
 
 export type ChainId = typeof CHAIN_IDS[keyof typeof CHAIN_IDS];
@@ -31,24 +36,49 @@ const CHAIN_IDS_TO_USDC_ADDRESSES: Record<ChainId, Hex> = {
   [CHAIN_IDS.ETH_SEPOLIA]: "0x1c7d4b196cb0c7b01d743fbc6116a902379c7238",
   [CHAIN_IDS.AVAX_FUJI]: "0x5425890298aed601595a70AB815c96711a31Bc65",
   [CHAIN_IDS.BASE_SEPOLIA]: "0x036CbD53842c5426634e7929541eC2318f3dCF7e",
+  [CHAIN_IDS.SONIC_BLAZE]: "0xA4879Fed32Ecbef99399e5cbC247E533421C4eC6",
+  [CHAIN_IDS.LINEA_SEPOLIA]:
+    "0xFEce4462D57bD51A6A552365A011b95f0E16d9B7",
+  [CHAIN_IDS.ARBITRUM_SEPOLIA]:
+    "0x75faf114eafb1BDbe2F0316DF893fd58CE46AA4d",
+  [CHAIN_IDS.WORLDCHAIN_SEPOLIA]:
+    "0x66145f38cBAC35Ca6F1Dfb4914dF98F1614aeA88",
 };
 
 const CHAIN_IDS_TO_TOKEN_MESSENGER: Record<ChainId, Hex> = {
   [CHAIN_IDS.ETH_SEPOLIA]: "0x8fe6b999dc680ccfdd5bf7eb0974218be2542daa",
   [CHAIN_IDS.AVAX_FUJI]: "0x8fe6b999dc680ccfdd5bf7eb0974218be2542daa",
   [CHAIN_IDS.BASE_SEPOLIA]: "0x8fe6b999dc680ccfdd5bf7eb0974218be2542daa",
+  [CHAIN_IDS.SONIC_BLAZE]: "0x8fe6b999dc680ccfdd5bf7eb0974218be2542daa",
+  [CHAIN_IDS.LINEA_SEPOLIA]:
+    "0x8fe6b999dc680ccfdd5bf7eb0974218be2542daa",
+  [CHAIN_IDS.ARBITRUM_SEPOLIA]:
+    "0x8fe6b999dc680ccfdd5bf7eb0974218be2542daa",
+  [CHAIN_IDS.WORLDCHAIN_SEPOLIA]:
+    "0x8fe6b999dc680ccfdd5bf7eb0974218be2542daa",
 };
 
 const CHAIN_IDS_TO_MESSAGE_TRANSMITTER: Record<ChainId, Hex> = {
   [CHAIN_IDS.ETH_SEPOLIA]: "0xe737e5cebeeba77efe34d4aa090756590b1ce275",
   [CHAIN_IDS.AVAX_FUJI]: "0xe737e5cebeeba77efe34d4aa090756590b1ce275",
   [CHAIN_IDS.BASE_SEPOLIA]: "0xe737e5cebeeba77efe34d4aa090756590b1ce275",
+  [CHAIN_IDS.SONIC_BLAZE]: "0xe737e5cebeeba77efe34d4aa090756590b1ce275",
+  [CHAIN_IDS.LINEA_SEPOLIA]:
+    "0xe737e5cebeeba77efe34d4aa090756590b1ce275",
+  [CHAIN_IDS.ARBITRUM_SEPOLIA]:
+    "0xe737e5cebeeba77efe34d4aa090756590b1ce275",
+  [CHAIN_IDS.WORLDCHAIN_SEPOLIA]:
+    "0xe737e5cebeeba77efe34d4aa090756590b1ce275",
 };
 
 const DESTINATION_DOMAINS: Record<ChainId, number> = {
   [CHAIN_IDS.ETH_SEPOLIA]: 0,
   [CHAIN_IDS.AVAX_FUJI]: 1,
   [CHAIN_IDS.BASE_SEPOLIA]: 6,
+  [CHAIN_IDS.SONIC_BLAZE]: 13,
+  [CHAIN_IDS.LINEA_SEPOLIA]: 11,
+  [CHAIN_IDS.ARBITRUM_SEPOLIA]: 3,
+  [CHAIN_IDS.WORLDCHAIN_SEPOLIA]: 14,
 };
 
 export type TransferStep =
@@ -64,6 +94,10 @@ const chains: Record<ChainId, Chain> = {
   [CHAIN_IDS.ETH_SEPOLIA]: sepolia,
   [CHAIN_IDS.AVAX_FUJI]: avalancheFuji,
   [CHAIN_IDS.BASE_SEPOLIA]: baseSepolia,
+  [CHAIN_IDS.SONIC_BLAZE]: sonicBlazeTestnet,
+  [CHAIN_IDS.LINEA_SEPOLIA]: lineaSepolia,
+  [CHAIN_IDS.ARBITRUM_SEPOLIA]: arbitrumSepolia,
+  [CHAIN_IDS.WORLDCHAIN_SEPOLIA]: worldchainSepolia,
 };
 
 export function useCrossChainTransfer() {
@@ -79,7 +113,7 @@ export function useCrossChainTransfer() {
   const addLog = (message: string) =>
     setLogs((prev) => [
       ...prev,
-      `[${new Date().toLocaleTimeString()}] ${message}`,
+      message,
     ]);
 
   const getPublicClient = (chainId: ChainId) => {
@@ -256,7 +290,6 @@ export function useCrossChainTransfer() {
 
         // Add 20% buffer to gas estimate
         const gasWithBuffer = (gasEstimate * 120n) / 100n;
-        addLog(`Gas Used: ${formatUnits(gasWithBuffer, 9)} Gwei`);
         await switchChain({ chainId: destinationChainId });
         addLog(`Switching to chain: ${destinationChainId}`);
         const tx = await client.sendTransaction({
