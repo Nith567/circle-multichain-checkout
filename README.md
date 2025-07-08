@@ -36,6 +36,20 @@ yarn add circle-multichain-checkout
 ```tsx
 import { CheckoutPage } from 'circle-multichain-checkout';
 
+  <CheckoutPage
+      merchantAddress="0xcfb31219238fe98eff27BBae2a00cEEaf0bE8BE5"
+      preferredChain={84532}
+      amount="99.99"
+      onSuccess={(txHash) => console.log('Payment successful:', txHash)}//handle successful payment
+      onError={(error) => console.error('Payment failed:', error)}//handle custom error
+    />
+```
+
+## Upcoming Version(From Evm to SolanaChains)
+
+```tsx
+import { CheckoutPage } from 'circle-multichain-checkout';
+
 function MyMerchantApp() {
   return (
     <CheckoutPage merchantAddress="AGPUNVimcG2Vybik5vnBSfHEsci9LmiL9Sbwf1rri3Y9"
@@ -44,7 +58,6 @@ function MyMerchantApp() {
       onSuccess={(txHash) => {
         console.log('Payment successful:', txHash);
         // Handle successful payment
-        // Update inventory,..
       }}
       onError={(error) => {
         console.error('Payment failed:', error);

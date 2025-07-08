@@ -1,39 +1,63 @@
 "use client";
 import { useState } from "react";
-import { createPublicClient, http, encodeFunctionData, TransactionExecutionError, parseUnits, formatUnits, } from "viem";
+import { createPublicClient, http, encodeFunctionData, TransactionExecutionError, parseUnits, } from "viem";
 import axios from "axios";
-import { sepolia, avalancheFuji, baseSepolia } from "viem/chains";
+import { sepolia, avalancheFuji, baseSepolia, arbitrumSepolia, worldchainSepolia, sonicBlazeTestnet, lineaSepolia } from "viem/chains";
 import { useWalletClient, usePublicClient, useSwitchChain } from 'wagmi';
 // Define chain IDs directly
 const CHAIN_IDS = {
     ETH_SEPOLIA: 11155111,
     AVAX_FUJI: 43113,
     BASE_SEPOLIA: 84532,
+    SONIC_BLAZE: 161,
+    LINEA_SEPOLIA: 59144,
+    ARBITRUM_SEPOLIA: 421614,
+    WORLDCHAIN_SEPOLIA: 1666700000,
 };
 const CHAIN_IDS_TO_USDC_ADDRESSES = {
     [CHAIN_IDS.ETH_SEPOLIA]: "0x1c7d4b196cb0c7b01d743fbc6116a902379c7238",
     [CHAIN_IDS.AVAX_FUJI]: "0x5425890298aed601595a70AB815c96711a31Bc65",
     [CHAIN_IDS.BASE_SEPOLIA]: "0x036CbD53842c5426634e7929541eC2318f3dCF7e",
+    [CHAIN_IDS.SONIC_BLAZE]: "0xA4879Fed32Ecbef99399e5cbC247E533421C4eC6",
+    [CHAIN_IDS.LINEA_SEPOLIA]: "0xFEce4462D57bD51A6A552365A011b95f0E16d9B7",
+    [CHAIN_IDS.ARBITRUM_SEPOLIA]: "0x75faf114eafb1BDbe2F0316DF893fd58CE46AA4d",
+    [CHAIN_IDS.WORLDCHAIN_SEPOLIA]: "0x66145f38cBAC35Ca6F1Dfb4914dF98F1614aeA88",
 };
 const CHAIN_IDS_TO_TOKEN_MESSENGER = {
     [CHAIN_IDS.ETH_SEPOLIA]: "0x8fe6b999dc680ccfdd5bf7eb0974218be2542daa",
     [CHAIN_IDS.AVAX_FUJI]: "0x8fe6b999dc680ccfdd5bf7eb0974218be2542daa",
     [CHAIN_IDS.BASE_SEPOLIA]: "0x8fe6b999dc680ccfdd5bf7eb0974218be2542daa",
+    [CHAIN_IDS.SONIC_BLAZE]: "0x8fe6b999dc680ccfdd5bf7eb0974218be2542daa",
+    [CHAIN_IDS.LINEA_SEPOLIA]: "0x8fe6b999dc680ccfdd5bf7eb0974218be2542daa",
+    [CHAIN_IDS.ARBITRUM_SEPOLIA]: "0x8fe6b999dc680ccfdd5bf7eb0974218be2542daa",
+    [CHAIN_IDS.WORLDCHAIN_SEPOLIA]: "0x8fe6b999dc680ccfdd5bf7eb0974218be2542daa",
 };
 const CHAIN_IDS_TO_MESSAGE_TRANSMITTER = {
     [CHAIN_IDS.ETH_SEPOLIA]: "0xe737e5cebeeba77efe34d4aa090756590b1ce275",
     [CHAIN_IDS.AVAX_FUJI]: "0xe737e5cebeeba77efe34d4aa090756590b1ce275",
     [CHAIN_IDS.BASE_SEPOLIA]: "0xe737e5cebeeba77efe34d4aa090756590b1ce275",
+    [CHAIN_IDS.SONIC_BLAZE]: "0xe737e5cebeeba77efe34d4aa090756590b1ce275",
+    [CHAIN_IDS.LINEA_SEPOLIA]: "0xe737e5cebeeba77efe34d4aa090756590b1ce275",
+    [CHAIN_IDS.ARBITRUM_SEPOLIA]: "0xe737e5cebeeba77efe34d4aa090756590b1ce275",
+    [CHAIN_IDS.WORLDCHAIN_SEPOLIA]: "0xe737e5cebeeba77efe34d4aa090756590b1ce275",
 };
 const DESTINATION_DOMAINS = {
     [CHAIN_IDS.ETH_SEPOLIA]: 0,
     [CHAIN_IDS.AVAX_FUJI]: 1,
     [CHAIN_IDS.BASE_SEPOLIA]: 6,
+    [CHAIN_IDS.SONIC_BLAZE]: 13,
+    [CHAIN_IDS.LINEA_SEPOLIA]: 11,
+    [CHAIN_IDS.ARBITRUM_SEPOLIA]: 3,
+    [CHAIN_IDS.WORLDCHAIN_SEPOLIA]: 14,
 };
 const chains = {
     [CHAIN_IDS.ETH_SEPOLIA]: sepolia,
     [CHAIN_IDS.AVAX_FUJI]: avalancheFuji,
     [CHAIN_IDS.BASE_SEPOLIA]: baseSepolia,
+    [CHAIN_IDS.SONIC_BLAZE]: sonicBlazeTestnet,
+    [CHAIN_IDS.LINEA_SEPOLIA]: lineaSepolia,
+    [CHAIN_IDS.ARBITRUM_SEPOLIA]: arbitrumSepolia,
+    [CHAIN_IDS.WORLDCHAIN_SEPOLIA]: worldchainSepolia,
 };
 export function useCrossChainTransfer() {
     const { data: walletClient } = useWalletClient();
@@ -45,7 +69,7 @@ export function useCrossChainTransfer() {
     const DEFAULT_DECIMALS = 6;
     const addLog = (message) => setLogs((prev) => [
         ...prev,
-        `[${new Date().toLocaleTimeString()}] ${message}`,
+        message,
     ]);
     const getPublicClient = (chainId) => {
         return createPublicClient({
@@ -190,7 +214,6 @@ export function useCrossChainTransfer() {
                 });
                 // Add 20% buffer to gas estimate
                 const gasWithBuffer = (gasEstimate * 120n) / 100n;
-                addLog(`Gas Used: ${formatUnits(gasWithBuffer, 9)} Gwei`);
                 await switchChain({ chainId: destinationChainId });
                 addLog(`Switching to chain: ${destinationChainId}`);
                 const tx = await client.sendTransaction({

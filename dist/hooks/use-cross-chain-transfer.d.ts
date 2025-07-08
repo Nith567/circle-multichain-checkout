@@ -2,6 +2,10 @@ declare const CHAIN_IDS: {
     readonly ETH_SEPOLIA: 11155111;
     readonly AVAX_FUJI: 43113;
     readonly BASE_SEPOLIA: 84532;
+    readonly SONIC_BLAZE: 161;
+    readonly LINEA_SEPOLIA: 59144;
+    readonly ARBITRUM_SEPOLIA: 421614;
+    readonly WORLDCHAIN_SEPOLIA: 1666700000;
 };
 export type ChainId = typeof CHAIN_IDS[keyof typeof CHAIN_IDS];
 export type TransferStep = "idle" | "approving" | "burning" | "waiting-attestation" | "minting" | "completed" | "error";
