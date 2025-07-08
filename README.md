@@ -45,7 +45,7 @@ import { CheckoutPage } from 'circle-multichain-checkout';
     />
 ```
 
-## Upcoming Version(From Evm to SolanaChains)
+## Upcoming Version(From EvmChains to onlySolana)
 
 ```tsx
 import { CheckoutPage } from 'circle-multichain-checkout';
