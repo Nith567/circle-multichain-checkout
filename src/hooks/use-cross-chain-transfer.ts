@@ -18,70 +18,24 @@ import axios from "axios";
 import { sepolia, avalancheFuji, baseSepolia, arbitrumSepolia, worldchainSepolia, sonicBlazeTestnet, lineaSepolia } from "viem/chains";
 import { useWalletClient, usePublicClient, useSwitchChain } from 'wagmi'
 import { SupportedChainId } from "@/lib/constants";
-
-// Define chain IDs directly
-const CHAIN_IDS = {
-  ETH_SEPOLIA: 11155111,
-  AVAX_FUJI: 43113,
-  BASE_SEPOLIA: 84532,
-  SONIC_BLAZE: 161,
-  LINEA_SEPOLIA: 59144,
-  ARBITRUM_SEPOLIA: 421614,
-  WORLDCHAIN_SEPOLIA: 1666700000,
-} as const;
-
-export type ChainId = typeof CHAIN_IDS[keyof typeof CHAIN_IDS];
-
-const CHAIN_IDS_TO_USDC_ADDRESSES: Record<ChainId, Hex> = {
-  [CHAIN_IDS.ETH_SEPOLIA]: "0x1c7d4b196cb0c7b01d743fbc6116a902379c7238",
-  [CHAIN_IDS.AVAX_FUJI]: "0x5425890298aed601595a70AB815c96711a31Bc65",
-  [CHAIN_IDS.BASE_SEPOLIA]: "0x036CbD53842c5426634e7929541eC2318f3dCF7e",
-  [CHAIN_IDS.SONIC_BLAZE]: "0xA4879Fed32Ecbef99399e5cbC247E533421C4eC6",
-  [CHAIN_IDS.LINEA_SEPOLIA]:
-    "0xFEce4462D57bD51A6A552365A011b95f0E16d9B7",
-  [CHAIN_IDS.ARBITRUM_SEPOLIA]:
-    "0x75faf114eafb1BDbe2F0316DF893fd58CE46AA4d",
-  [CHAIN_IDS.WORLDCHAIN_SEPOLIA]:
-    "0x66145f38cBAC35Ca6F1Dfb4914dF98F1614aeA88",
-};
-
-const CHAIN_IDS_TO_TOKEN_MESSENGER: Record<ChainId, Hex> = {
-  [CHAIN_IDS.ETH_SEPOLIA]: "0x8fe6b999dc680ccfdd5bf7eb0974218be2542daa",
-  [CHAIN_IDS.AVAX_FUJI]: "0x8fe6b999dc680ccfdd5bf7eb0974218be2542daa",
-  [CHAIN_IDS.BASE_SEPOLIA]: "0x8fe6b999dc680ccfdd5bf7eb0974218be2542daa",
-  [CHAIN_IDS.SONIC_BLAZE]: "0x8fe6b999dc680ccfdd5bf7eb0974218be2542daa",
-  [CHAIN_IDS.LINEA_SEPOLIA]:
-    "0x8fe6b999dc680ccfdd5bf7eb0974218be2542daa",
-  [CHAIN_IDS.ARBITRUM_SEPOLIA]:
-    "0x8fe6b999dc680ccfdd5bf7eb0974218be2542daa",
-  [CHAIN_IDS.WORLDCHAIN_SEPOLIA]:
-    "0x8fe6b999dc680ccfdd5bf7eb0974218be2542daa",
-};
-
-const CHAIN_IDS_TO_MESSAGE_TRANSMITTER: Record<ChainId, Hex> = {
-  [CHAIN_IDS.ETH_SEPOLIA]: "0xe737e5cebeeba77efe34d4aa090756590b1ce275",
-  [CHAIN_IDS.AVAX_FUJI]: "0xe737e5cebeeba77efe34d4aa090756590b1ce275",
-  [CHAIN_IDS.BASE_SEPOLIA]: "0xe737e5cebeeba77efe34d4aa090756590b1ce275",
-  [CHAIN_IDS.SONIC_BLAZE]: "0xe737e5cebeeba77efe34d4aa090756590b1ce275",
-  [CHAIN_IDS.LINEA_SEPOLIA]:
-    "0xe737e5cebeeba77efe34d4aa090756590b1ce275",
-  [CHAIN_IDS.ARBITRUM_SEPOLIA]:
-    "0xe737e5cebeeba77efe34d4aa090756590b1ce275",
-  [CHAIN_IDS.WORLDCHAIN_SEPOLIA]:
-    "0xe737e5cebeeba77efe34d4aa090756590b1ce275",
-};
-
-const DESTINATION_DOMAINS: Record<ChainId, number> = {
-  [CHAIN_IDS.ETH_SEPOLIA]: 0,
-  [CHAIN_IDS.AVAX_FUJI]: 1,
-  [CHAIN_IDS.BASE_SEPOLIA]: 6,
-  [CHAIN_IDS.SONIC_BLAZE]: 13,
-  [CHAIN_IDS.LINEA_SEPOLIA]: 11,
-  [CHAIN_IDS.ARBITRUM_SEPOLIA]: 3,
-  [CHAIN_IDS.WORLDCHAIN_SEPOLIA]: 14,
-};
+import { 
+  CHAIN_IDS, 
+  type ChainId, 
+  CHAIN_IDS_TO_USDC_ADDRESSES,
+  CHAIN_IDS_TO_TOKEN_MESSENGER,
+  CHAIN_IDS_TO_MESSAGE_TRANSMITTER,
+  DESTINATION_DOMAINS
+} from "@/lib/chains";
 
 export type TransferStep =
+  | "idle"
+  | "processing"
+  | "confirming"
+  | "completed"
+  | "error";
+
+// Internal technical steps mapping for developers/debugging
+export type InternalTransferStep =
   | "idle"
   | "approving"
   | "burning"
@@ -110,6 +64,30 @@ export function useCrossChainTransfer() {
 
   const DEFAULT_DECIMALS = 6;
 
+  // Map internal steps to user-friendly steps
+  const mapToUserStep = (internalStep: InternalTransferStep): TransferStep => {
+    switch (internalStep) {
+      case "idle":
+        return "idle";
+      case "approving":
+      case "burning":
+        return "processing";
+      case "waiting-attestation":
+      case "minting":
+        return "confirming";
+      case "completed":
+        return "completed";
+      case "error":
+        return "error";
+      default:
+        return "processing";
+    }
+  };
+
+  const setInternalStep = (step: InternalTransferStep) => {
+    setCurrentStep(mapToUserStep(step));
+  };
+
   const addLog = (message: string) =>
     setLogs((prev) => [
       ...prev,
@@ -127,8 +105,8 @@ export function useCrossChainTransfer() {
     client: WalletClient<HttpTransport, Chain, Account>,
     sourceChainId: ChainId
   ) => {
-    setCurrentStep("approving");
-    addLog("Approving USDC transfer...");
+    setInternalStep("approving");
+    addLog("Preparing your payment...");
 
     try {
       const tx = await client.sendTransaction({
@@ -151,10 +129,10 @@ export function useCrossChainTransfer() {
         }),
       });
 
-      addLog(`USDC Approval Tx: ${tx}`);
+      addLog(`Payment preparation complete: ${tx}`);
       return tx;
     } catch (err) {
-      setError("Approval failed");
+      setError("Payment preparation failed");
       throw err;
     }
   };
@@ -167,8 +145,8 @@ export function useCrossChainTransfer() {
     destinationAddress: string,
     transferType: "fast" | "standard"
   ) => {
-    setCurrentStep("burning");
-    addLog("Burning USDC...");
+    setInternalStep("burning");
+    addLog("Processing your cross-chain payment...");
 
     try {
       const finalityThreshold = transferType === "fast" ? 1000 : 2000;
@@ -210,10 +188,10 @@ export function useCrossChainTransfer() {
         }),
       });
 
-      addLog(`Burn Tx: ${tx}`);
+      addLog(`Payment initiated: ${tx}`);
       return tx;
     } catch (err) {
-      setError("Burn failed");
+      setError("Payment processing failed");
       throw err;
     }
   };
@@ -222,8 +200,8 @@ export function useCrossChainTransfer() {
     transactionHash: string,
     sourceChainId: ChainId
   ) => {
-    setCurrentStep("waiting-attestation");
-    addLog("Retrieving attestation...");
+    setInternalStep("waiting-attestation");
+    addLog("Confirming your payment...");
 
     const url = `https://iris-api-sandbox.circle.com/v2/messages/${DESTINATION_DOMAINS[sourceChainId]}?transactionHash=${transactionHash}`;
 
@@ -231,17 +209,17 @@ export function useCrossChainTransfer() {
       try {
         const response = await axios.get(url);
         if (response.data?.messages?.[0]?.status === "complete") {
-          addLog("Attestation retrieved!");
+          addLog("Payment confirmed!");
           return response.data.messages[0];
         }
-        addLog("Waiting for attestation...");
+        addLog("Confirming payment on destination chain...");
         await new Promise((resolve) => setTimeout(resolve, 5000));
       } catch (error) {
         if (axios.isAxiosError(error) && error.response?.status === 404) {
           await new Promise((resolve) => setTimeout(resolve, 5000));
           continue;
         }
-        setError("Attestation retrieval failed");
+        setError("Payment confirmation failed");
         throw error;
       }
     }
@@ -253,8 +231,8 @@ export function useCrossChainTransfer() {
   ) => {
     const MAX_RETRIES = 3;
     let retries = 0;
-    setCurrentStep("minting");
-    addLog("Minting USDC...");
+    setInternalStep("minting");
+    addLog("Finalizing your payment...");
 
     while (retries < MAX_RETRIES) {
       try {
@@ -304,8 +282,8 @@ export function useCrossChainTransfer() {
           maxPriorityFeePerGas: feeData.maxPriorityFeePerGas,
         });
 
-        addLog(`Mint Tx: ${tx}`);
-        setCurrentStep("completed");
+        addLog(`Payment completed successfully: ${tx}`);
+        setInternalStep("completed");
         break;
       } catch (err) {
         if (err instanceof TransactionExecutionError && retries < MAX_RETRIES) {
@@ -315,7 +293,7 @@ export function useCrossChainTransfer() {
           continue;
         }
         const errorMessage = err instanceof Error ? err.message : String(err);
-        addLog(`Mint error: ${errorMessage}`);
+        addLog(`Payment error: ${errorMessage}`);
         setError(errorMessage);
         throw err;
       }
@@ -347,7 +325,7 @@ export function useCrossChainTransfer() {
       const mintTx = await mintUSDC(walletClient as WalletClient<HttpTransport, Chain, Account>, preferredChainId, attestation)
       return { burnTx, mintTx, attestation, sourceChain: sourceChainId, destinationChain: preferredChainId }
     } catch (error) {
-      setCurrentStep("error");
+      setInternalStep("error");
       const errorMessage = error instanceof Error ? error.message : "Unknown error";
       addLog(`Error: ${errorMessage}`);
       throw error;
