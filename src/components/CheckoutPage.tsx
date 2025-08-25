@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useAccount, useWalletClient } from 'wagmi';
-import { useCrossChainTransfer, type ChainId } from '../hooks/use-cross-chain-transfer';
+import { useCrossChainTransfer } from '../hooks/use-cross-chain-transfer';
+import { CHAIN_IDS, type ChainId } from '../lib/chains';
+import { cn } from '../lib/utils';
 import { Card, CardHeader, CardTitle, CardContent } from './ui/card';
 import { Label } from './ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
@@ -9,9 +11,13 @@ import { ProgressSteps } from './progress-step';
 import { TransferLog } from './transfer-log';
 
 const CHAIN_OPTIONS = [
-  { id: 11155111, name: 'Ethereum Sepolia' },
-  { id: 43113, name: 'Avalanche Fuji' },
-  { id: 84532, name: 'Base Sepolia' },
+  { id: CHAIN_IDS.ETH_SEPOLIA, name: 'Ethereum Sepolia', icon: '🔷' },
+  { id: CHAIN_IDS.AVAX_FUJI, name: 'Avalanche Fuji', icon: '🔺' },
+  { id: CHAIN_IDS.BASE_SEPOLIA, name: 'Base Sepolia', icon: '🔵' },
+  { id: CHAIN_IDS.ARBITRUM_SEPOLIA, name: 'Arbitrum Sepolia', icon: '🔴' },
+  { id: CHAIN_IDS.LINEA_SEPOLIA, name: 'Linea Sepolia', icon: '⚡' },
+  { id: CHAIN_IDS.WORLDCHAIN_SEPOLIA, name: 'Worldchain Sepolia', icon: '🌍' },
+  { id: CHAIN_IDS.SONIC_BLAZE, name: 'Sonic Blaze', icon: '💨' },
 ] as const;
 
 export interface CheckoutPageProps {
@@ -36,8 +42,15 @@ export function CheckoutPage({
 }: CheckoutPageProps) {
   const { address, isConnected } = useAccount();
   const { data: walletClient } = useWalletClient();
-  const { executeMerchantPayment, currentStep, logs } = useCrossChainTransfer();
-  const [sourceChain, setSourceChain] = useState<ChainId>(11155111);
+  const { executeMerchantPayment, currentStep, logs, error, reset } = useCrossChainTransfer();
+  const [sourceChain, setSourceChain] = useState<ChainId>(CHAIN_IDS.ETH_SEPOLIA);
+
+  const getChainInfo = (chainId: ChainId) => {
+    return CHAIN_OPTIONS.find(chain => chain.id === chainId);
+  };
+
+  const preferredChainInfo = getChainInfo(preferredChain);
+  const isProcessing = currentStep !== 'idle' && currentStep !== 'completed' && currentStep !== 'error';
 
   const handlePayment = async () => {
     if (!walletClient || !address) {
@@ -46,6 +59,7 @@ export function CheckoutPage({
     }
 
     try {
+      reset(); // Clear any previous errors
       const result = await executeMerchantPayment(
         sourceChain,
         merchantAddress,
@@ -59,49 +73,111 @@ export function CheckoutPage({
   };
 
   return (
-    <Card className="max-w-3xl mx-auto" style={customStyles}>
-      <CardHeader>
-        <CardTitle className="text-center">USDC Payment</CardTitle>
+    <Card className="max-w-4xl mx-auto shadow-lg" style={customStyles}>
+      <CardHeader className="text-center pb-6">
+        <CardTitle className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+          Cross-Chain USDC Payment
+        </CardTitle>
+        <p className="text-gray-600 mt-2">Secure multi-chain payment processing</p>
       </CardHeader>
-      <CardContent className="space-y-6">
-        <div className="space-y-2">
-          <Label>Amount to Pay</Label>
-          <div className="text-2xl font-bold">{amount} USDC</div>
-          <div className="text-sm text-muted-foreground">
-            Will be received on chain {preferredChain}
+      <CardContent className="space-y-8">
+        {/* Payment Summary */}
+        <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-6 rounded-xl border border-blue-100">
+          <div className="flex justify-between items-center">
+            <div>
+              <Label className="text-gray-600">Amount to Pay</Label>
+              <div className="text-3xl font-bold text-gray-900">{amount} USDC</div>
+            </div>
+            <div className="text-right">
+              <Label className="text-gray-600">Destination</Label>
+              <div className="flex items-center text-lg font-semibold text-gray-900">
+                <span className="mr-2">{preferredChainInfo?.icon}</span>
+                {preferredChainInfo?.name || `Chain ${preferredChain}`}
+              </div>
+            </div>
           </div>
         </div>
 
-        <div className="space-y-2">
-          <Label>Pay From Chain</Label>
+        {/* Source Chain Selection */}
+        <div className="space-y-3">
+          <Label className="text-lg font-medium">Pay From Chain</Label>
           <Select
             value={String(sourceChain)}
             onValueChange={(value) => setSourceChain(Number(value) as ChainId)}
+            disabled={isProcessing}
           >
-            <SelectTrigger>
+            <SelectTrigger className="h-14 text-lg">
               <SelectValue placeholder="Select source chain" />
             </SelectTrigger>
             <SelectContent>
               {CHAIN_OPTIONS.map((chain) => (
-                <SelectItem key={chain.id} value={String(chain.id)}>
-                  {chain.name}
+                <SelectItem key={chain.id} value={String(chain.id)} className="h-12">
+                  <div className="flex items-center space-x-3">
+                    <span className="text-xl">{chain.icon}</span>
+                    <span className="font-medium">{chain.name}</span>
+                  </div>
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
         </div>
 
-        <ProgressSteps currentStep={currentStep} />
+        {/* Progress Steps */}
+        <div className="bg-white p-6 rounded-xl border border-gray-200">
+          <h3 className="text-lg font-semibold mb-4 text-gray-900">Payment Progress</h3>
+          <ProgressSteps currentStep={currentStep} />
+        </div>
 
-        <TransferLog logs={logs} />
+        {/* Error Display */}
+        {error && (
+          <div className="bg-red-50 border border-red-200 rounded-xl p-4">
+            <div className="flex items-center space-x-2">
+              <span className="text-red-500">❌</span>
+              <span className="text-red-700 font-medium">Payment Failed</span>
+            </div>
+            <p className="text-red-600 mt-2">{error}</p>
+          </div>
+        )}
 
+        {/* Transfer Logs */}
+        {logs.length > 0 && (
+          <div className="bg-gray-50 rounded-xl border border-gray-200">
+            <TransferLog logs={logs} />
+          </div>
+        )}
+
+        {/* Action Button */}
         <Button 
           onClick={handlePayment}
-          disabled={currentStep !== 'idle' || !isConnected}
-          className="w-full"
+          disabled={isProcessing || !isConnected}
+          className={cn(
+            "w-full h-14 text-lg font-semibold transition-all duration-200",
+            isProcessing && "cursor-not-allowed",
+            currentStep === 'completed' && "bg-green-600 hover:bg-green-700"
+          )}
         >
-          {!isConnected ? 'Connect Wallet to Pay' : `Pay ${amount} USDC`}
+          {!isConnected 
+            ? '🔗 Connect Wallet to Pay' 
+            : currentStep === 'completed'
+            ? '✅ Payment Completed'
+            : currentStep === 'error'
+            ? '🔄 Try Again'
+            : isProcessing
+            ? `🔄 Processing Payment...`
+            : `💳 Pay ${amount} USDC`
+          }
         </Button>
+
+        {/* Reset Button for completed/error states */}
+        {(currentStep === 'completed' || currentStep === 'error') && (
+          <Button 
+            onClick={reset}
+            variant="outline"
+            className="w-full h-12"
+          >
+            🔄 Start New Payment
+          </Button>
+        )}
       </CardContent>
     </Card>
   );
