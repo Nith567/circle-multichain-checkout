@@ -1,24 +1,23 @@
 declare const steps: readonly [{
     readonly id: "idle";
     readonly label: "Ready";
+    readonly icon: "💳";
 }, {
-    readonly id: "approving";
-    readonly label: "Approving";
+    readonly id: "processing";
+    readonly label: "Processing";
+    readonly icon: "🔄";
 }, {
-    readonly id: "burning";
-    readonly label: "Burning";
-}, {
-    readonly id: "waiting-attestation";
-    readonly label: "Waiting";
-}, {
-    readonly id: "minting";
-    readonly label: "Minting";
+    readonly id: "confirming";
+    readonly label: "Confirming";
+    readonly icon: "🔍";
 }, {
     readonly id: "completed";
     readonly label: "Complete";
+    readonly icon: "✅";
 }, {
     readonly id: "error";
     readonly label: "Error";
+    readonly icon: "❌";
 }];
 type Step = typeof steps[number]['id'];
 interface ProgressStepsProps {

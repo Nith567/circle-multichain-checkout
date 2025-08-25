@@ -1,4 +1,4 @@
-import { type ChainId } from '../hooks/use-cross-chain-transfer';
+import { type ChainId } from '../lib/chains';
 export interface CheckoutPageProps {
     merchantAddress: string;
     preferredChain: ChainId;

@@ -2,6 +2,8 @@ import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import { useState } from 'react';
 import { useAccount, useWalletClient } from 'wagmi';
 import { useCrossChainTransfer } from '../hooks/use-cross-chain-transfer';
+import { CHAIN_IDS } from '../lib/chains';
+import { cn } from '../lib/utils';
 import { Card, CardHeader, CardTitle, CardContent } from './ui/card';
 import { Label } from './ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
@@ -9,21 +11,31 @@ import { Button } from './ui/button';
 import { ProgressSteps } from './progress-step';
 import { TransferLog } from './transfer-log';
 const CHAIN_OPTIONS = [
-    { id: 11155111, name: 'Ethereum Sepolia' },
-    { id: 43113, name: 'Avalanche Fuji' },
-    { id: 84532, name: 'Base Sepolia' },
+    { id: CHAIN_IDS.ETH_SEPOLIA, name: 'Ethereum Sepolia', icon: '🔷' },
+    { id: CHAIN_IDS.AVAX_FUJI, name: 'Avalanche Fuji', icon: '🔺' },
+    { id: CHAIN_IDS.BASE_SEPOLIA, name: 'Base Sepolia', icon: '🔵' },
+    { id: CHAIN_IDS.ARBITRUM_SEPOLIA, name: 'Arbitrum Sepolia', icon: '🔴' },
+    { id: CHAIN_IDS.LINEA_SEPOLIA, name: 'Linea Sepolia', icon: '⚡' },
+    { id: CHAIN_IDS.WORLDCHAIN_SEPOLIA, name: 'Worldchain Sepolia', icon: '🌍' },
+    { id: CHAIN_IDS.SONIC_BLAZE, name: 'Sonic Blaze', icon: '💨' },
 ];
 export function CheckoutPage({ merchantAddress, preferredChain, amount, onSuccess, onError, customStyles = {} }) {
     const { address, isConnected } = useAccount();
     const { data: walletClient } = useWalletClient();
-    const { executeMerchantPayment, currentStep, logs } = useCrossChainTransfer();
-    const [sourceChain, setSourceChain] = useState(11155111);
+    const { executeMerchantPayment, currentStep, logs, error, reset } = useCrossChainTransfer();
+    const [sourceChain, setSourceChain] = useState(CHAIN_IDS.ETH_SEPOLIA);
+    const getChainInfo = (chainId) => {
+        return CHAIN_OPTIONS.find(chain => chain.id === chainId);
+    };
+    const preferredChainInfo = getChainInfo(preferredChain);
+    const isProcessing = currentStep !== 'idle' && currentStep !== 'completed' && currentStep !== 'error';
     const handlePayment = async () => {
         if (!walletClient || !address) {
             onError?.(new Error('Please connect your wallet first'));
             return;
         }
         try {
+            reset(); // Clear any previous errors
             const result = await executeMerchantPayment(sourceChain, merchantAddress, preferredChain, amount);
             if (result?.burnTx)
                 onSuccess?.(result.burnTx);
@@ -32,5 +44,13 @@ export function CheckoutPage({ merchantAddress, preferredChain, amount, onSucces
             onError?.(error instanceof Error ? error : new Error('Payment failed'));
         }
     };
-    return (_jsxs(Card, { className: "max-w-3xl mx-auto", style: customStyles, children: [_jsx(CardHeader, { children: _jsx(CardTitle, { className: "text-center", children: "USDC Payment" }) }), _jsxs(CardContent, { className: "space-y-6", children: [_jsxs("div", { className: "space-y-2", children: [_jsx(Label, { children: "Amount to Pay" }), _jsxs("div", { className: "text-2xl font-bold", children: [amount, " USDC"] }), _jsxs("div", { className: "text-sm text-muted-foreground", children: ["Will be received on chain ", preferredChain] })] }), _jsxs("div", { className: "space-y-2", children: [_jsx(Label, { children: "Pay From Chain" }), _jsxs(Select, { value: String(sourceChain), onValueChange: (value) => setSourceChain(Number(value)), children: [_jsx(SelectTrigger, { children: _jsx(SelectValue, { placeholder: "Select source chain" }) }), _jsx(SelectContent, { children: CHAIN_OPTIONS.map((chain) => (_jsx(SelectItem, { value: String(chain.id), children: chain.name }, chain.id))) })] })] }), _jsx(ProgressSteps, { currentStep: currentStep }), _jsx(TransferLog, { logs: logs }), _jsx(Button, { onClick: handlePayment, disabled: currentStep !== 'idle' || !isConnected, className: "w-full", children: !isConnected ? 'Connect Wallet to Pay' : `Pay ${amount} USDC` })] })] }));
+    return (_jsxs(Card, { className: "max-w-4xl mx-auto shadow-lg", style: customStyles, children: [_jsxs(CardHeader, { className: "text-center pb-6", children: [_jsx(CardTitle, { className: "text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent", children: "Cross-Chain USDC Payment" }), _jsx("p", { className: "text-gray-600 mt-2", children: "Secure multi-chain payment processing" })] }), _jsxs(CardContent, { className: "space-y-8", children: [_jsx("div", { className: "bg-gradient-to-r from-blue-50 to-purple-50 p-6 rounded-xl border border-blue-100", children: _jsxs("div", { className: "flex justify-between items-center", children: [_jsxs("div", { children: [_jsx(Label, { className: "text-gray-600", children: "Amount to Pay" }), _jsxs("div", { className: "text-3xl font-bold text-gray-900", children: [amount, " USDC"] })] }), _jsxs("div", { className: "text-right", children: [_jsx(Label, { className: "text-gray-600", children: "Destination" }), _jsxs("div", { className: "flex items-center text-lg font-semibold text-gray-900", children: [_jsx("span", { className: "mr-2", children: preferredChainInfo?.icon }), preferredChainInfo?.name || `Chain ${preferredChain}`] })] })] }) }), _jsxs("div", { className: "space-y-3", children: [_jsx(Label, { className: "text-lg font-medium", children: "Pay From Chain" }), _jsxs(Select, { value: String(sourceChain), onValueChange: (value) => setSourceChain(Number(value)), disabled: isProcessing, children: [_jsx(SelectTrigger, { className: "h-14 text-lg", children: _jsx(SelectValue, { placeholder: "Select source chain" }) }), _jsx(SelectContent, { children: CHAIN_OPTIONS.map((chain) => (_jsx(SelectItem, { value: String(chain.id), className: "h-12", children: _jsxs("div", { className: "flex items-center space-x-3", children: [_jsx("span", { className: "text-xl", children: chain.icon }), _jsx("span", { className: "font-medium", children: chain.name })] }) }, chain.id))) })] })] }), _jsxs("div", { className: "bg-white p-6 rounded-xl border border-gray-200", children: [_jsx("h3", { className: "text-lg font-semibold mb-4 text-gray-900", children: "Payment Progress" }), _jsx(ProgressSteps, { currentStep: currentStep })] }), error && (_jsxs("div", { className: "bg-red-50 border border-red-200 rounded-xl p-4", children: [_jsxs("div", { className: "flex items-center space-x-2", children: [_jsx("span", { className: "text-red-500", children: "\u274C" }), _jsx("span", { className: "text-red-700 font-medium", children: "Payment Failed" })] }), _jsx("p", { className: "text-red-600 mt-2", children: error })] })), logs.length > 0 && (_jsx("div", { className: "bg-gray-50 rounded-xl border border-gray-200", children: _jsx(TransferLog, { logs: logs }) })), _jsx(Button, { onClick: handlePayment, disabled: isProcessing || !isConnected, className: cn("w-full h-14 text-lg font-semibold transition-all duration-200", isProcessing && "cursor-not-allowed", currentStep === 'completed' && "bg-green-600 hover:bg-green-700"), children: !isConnected
+                            ? '🔗 Connect Wallet to Pay'
+                            : currentStep === 'completed'
+                                ? '✅ Payment Completed'
+                                : currentStep === 'error'
+                                    ? '🔄 Try Again'
+                                    : isProcessing
+                                        ? `🔄 Processing Payment...`
+                                        : `💳 Pay ${amount} USDC` }), (currentStep === 'completed' || currentStep === 'error') && (_jsx(Button, { onClick: reset, variant: "outline", className: "w-full h-12", children: "\uD83D\uDD04 Start New Payment" }))] })] }));
 }
