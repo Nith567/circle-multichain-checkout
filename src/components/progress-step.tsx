@@ -2,12 +2,12 @@
 
 import React from 'react';
 import { cn } from "../lib/utils";
-import { CreditCard, Loader2, CheckCircle2, XCircle, ArrowRight } from "lucide-react";
+import { CreditCard, Loader2, CheckCircle2, XCircle, Shield, Clock } from "lucide-react";
 
 const steps = [
   { id: 'idle', label: 'Ready', icon: CreditCard },
   { id: 'processing', label: 'Processing', icon: Loader2 },
-  { id: 'confirming', label: 'Confirming', icon: ArrowRight },
+  { id: 'confirming', label: 'Confirming', icon: Shield },
   { id: 'completed', label: 'Complete', icon: CheckCircle2 },
   { id: 'error', label: 'Error', icon: XCircle },
 ] as const;
@@ -44,7 +44,15 @@ export function ProgressSteps({ currentStep }: ProgressStepsProps) {
 
   return (
     <div className="w-full">
-      <div className="flex justify-between mb-4">
+      <div className="relative flex justify-between mb-4">
+        {/* Progress line */}
+        <div className="absolute top-6 left-0 right-0 h-0.5 bg-gray-200 -z-10">
+          <div 
+            className="h-full bg-gradient-to-r from-blue-500 to-green-500 transition-all duration-500"
+            style={{ width: `${(visibleCurrentIndex / (visibleSteps.length - 1)) * 100}%` }}
+          />
+        </div>
+        
         {visibleSteps.map((step, index) => (
           <div
             key={step.id}
@@ -55,23 +63,29 @@ export function ProgressSteps({ currentStep }: ProgressStepsProps) {
           >
             <div
               className={cn(
-                'w-12 h-12 rounded-full flex items-center justify-center mb-2 transition-all duration-300',
-                index <= visibleCurrentIndex 
-                  ? 'bg-blue-600 text-white shadow-lg scale-110' 
-                  : 'bg-gray-200',
-                index === visibleCurrentIndex && currentStep === 'processing' && 'animate-spin'
+                'w-12 h-12 rounded-full flex items-center justify-center mb-2 transition-all duration-300 border-2',
+                index < visibleCurrentIndex 
+                  ? 'bg-green-500 border-green-500 text-white shadow-lg' 
+                  : index === visibleCurrentIndex
+                  ? 'bg-blue-600 border-blue-600 text-white shadow-lg animate-pulse'
+                  : 'bg-white border-gray-300 text-gray-400',
+                index === visibleCurrentIndex && currentStep === 'processing' && 'animate-bounce',
+                index === visibleCurrentIndex && currentStep === 'confirming' && 'animate-pulse'
               )}
             >
               {React.createElement(step.icon, { 
                 className: cn(
-                  "w-6 h-6",
-                  index === visibleCurrentIndex && currentStep === 'processing' && "animate-spin"
+                  "w-5 h-5",
+                  index === visibleCurrentIndex && currentStep === 'processing' && "animate-spin",
+                  index === visibleCurrentIndex && currentStep === 'confirming' && "animate-pulse"
                 )
               })}
             </div>
             <span className={cn(
               "text-sm font-medium",
-              index <= visibleCurrentIndex ? 'text-blue-600' : 'text-gray-500'
+              index < visibleCurrentIndex ? 'text-green-600' 
+              : index === visibleCurrentIndex ? 'text-blue-600 font-semibold' 
+              : 'text-gray-500'
             )}>
               {step.label}
             </span>

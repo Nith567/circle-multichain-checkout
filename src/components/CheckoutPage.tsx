@@ -150,7 +150,7 @@ export function CheckoutPage({
               href={getExplorerLink(completedTx.hash, completedTx.chainId)}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-emerald-600 to-green-600 text-white rounded-lg hover:from-emerald-700 hover:to-green-700 transition-all duration-200 shadow-md hover:shadow-lg"
+              className="inline-flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-emerald-600 to-green-600 text-white rounded-lg hover:from-emerald-700 hover:to-green-700 transition-all duration-200 shadow-lg hover:shadow-xl border border-emerald-500 font-medium"
             >
               <span>View Transaction</span>
               <ExternalLink className="w-4 h-4" />
