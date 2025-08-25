@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 declare const steps: readonly [{
     readonly id: "idle";
     readonly label: "Ready";
@@ -20,7 +20,7 @@ declare const steps: readonly [{
     readonly label: "Error";
     readonly icon: React.ForwardRefExoticComponent<Omit<import("lucide-react").LucideProps, "ref"> & React.RefAttributes<SVGSVGElement>>;
 }];
-type Step = typeof steps[number]['id'];
+type Step = typeof steps[number]["id"];
 interface ProgressStepsProps {
     currentStep: Step;
 }
