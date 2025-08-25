@@ -15,13 +15,9 @@ A merchant-focused npm package for seamless cross-chain USDC payments using Circ
 
 ## Supported Chains
 
-### Current (EVM)
 - Ethereum Sepolia
 - Avalanche Fuji C-Chain  
 - Base Sepolia
-
-### Coming Soon
-- Solana (Mainnet & Devnet)
 
 ## Installation
 
@@ -45,28 +41,6 @@ import { CheckoutPage } from 'circle-multichain-checkout';
     />
 ```
 
-## Upcoming Version(From EvmChains to onlySolana)
-
-```tsx
-import { CheckoutPage } from 'circle-multichain-checkout';
-
-function MyMerchantApp() {
-  return (
-    <CheckoutPage merchantAddress="AGPUNVimcG2Vybik5vnBSfHEsci9LmiL9Sbwf1rri3Y9"
-      preferredChain={solanaDevnet}//or Solana Mainnet 
-      amount="30"//usdc amount
-      onSuccess={(txHash) => {
-        console.log('Payment successful:', txHash);
-        // Handle successful payment
-      }}
-      onError={(error) => {
-        console.error('Payment failed:', error);
-        // Handle payment failure
-      }}
-    />
-  );
-}
-```
 
 ## How It Works
 
@@ -76,23 +50,6 @@ function MyMerchantApp() {
 4. **USDC is minted** on your preferred destination chain
 5. **You receive USDC** on your specified address
 
-
-
-### Upcoming and present  Working Chains
-
-```typescript
-const CHAIN = {
-    SOLANA,
-    SOLANA DEVNET,
-  ETH_SEPOLIA: 11155111,
-  AVAX_FUJI: 43113,
-  BASE_SEPOLIA: 84532,
-  SONIC_BLAZE: 161,
-  LINEA_SEPOLIA: 59144,
-  ARBITRUM_SEPOLIA: 421614,
-  WORLDCHAIN_SEPOLIA: 1666700000,
-} as const;
-```
 
 ## Use Cases
 
