@@ -22,3 +22,4 @@ export declare const CHAIN_IDS_TO_TOKEN_MESSENGER: Record<ChainId, Hex>;
 export declare const CHAIN_IDS_TO_MESSAGE_TRANSMITTER: Record<ChainId, Hex>;
 export declare const DESTINATION_DOMAINS: Record<ChainId, number>;
 export declare const SUPPORTED_CHAINS: SupportedChainId[];
+export declare const CHAIN_EXPLORERS: Record<ChainId, string>;

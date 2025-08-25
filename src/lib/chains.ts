@@ -73,3 +73,13 @@ export const SUPPORTED_CHAINS = [
   SupportedChainId.AVAX_FUJI,
   SupportedChainId.BASE_SEPOLIA,
 ];
+
+export const CHAIN_EXPLORERS: Record<ChainId, string> = {
+  [CHAIN_IDS.ETH_SEPOLIA]: "https://sepolia.etherscan.io/tx/",
+  [CHAIN_IDS.AVAX_FUJI]: "https://testnet.snowtrace.io/tx/",
+  [CHAIN_IDS.BASE_SEPOLIA]: "https://sepolia.basescan.org/tx/",
+  [CHAIN_IDS.SONIC_BLAZE]: "https://testnet.soniclabs.com/tx/",
+  [CHAIN_IDS.LINEA_SEPOLIA]: "https://sepolia.lineascan.build/tx/",
+  [CHAIN_IDS.ARBITRUM_SEPOLIA]: "https://sepolia.arbiscan.io/tx/",
+  [CHAIN_IDS.WORLDCHAIN_SEPOLIA]: "https://worldchain-sepolia.explorer.alchemy.com/tx/",
+};

@@ -1,23 +1,24 @@
+import React from 'react';
 declare const steps: readonly [{
     readonly id: "idle";
     readonly label: "Ready";
-    readonly icon: "💳";
+    readonly icon: React.ForwardRefExoticComponent<Omit<import("lucide-react").LucideProps, "ref"> & React.RefAttributes<SVGSVGElement>>;
 }, {
     readonly id: "processing";
     readonly label: "Processing";
-    readonly icon: "🔄";
+    readonly icon: React.ForwardRefExoticComponent<Omit<import("lucide-react").LucideProps, "ref"> & React.RefAttributes<SVGSVGElement>>;
 }, {
     readonly id: "confirming";
     readonly label: "Confirming";
-    readonly icon: "🔍";
+    readonly icon: React.ForwardRefExoticComponent<Omit<import("lucide-react").LucideProps, "ref"> & React.RefAttributes<SVGSVGElement>>;
 }, {
     readonly id: "completed";
     readonly label: "Complete";
-    readonly icon: "✅";
+    readonly icon: React.ForwardRefExoticComponent<Omit<import("lucide-react").LucideProps, "ref"> & React.RefAttributes<SVGSVGElement>>;
 }, {
     readonly id: "error";
     readonly label: "Error";
-    readonly icon: "❌";
+    readonly icon: React.ForwardRefExoticComponent<Omit<import("lucide-react").LucideProps, "ref"> & React.RefAttributes<SVGSVGElement>>;
 }];
 type Step = typeof steps[number]['id'];
 interface ProgressStepsProps {

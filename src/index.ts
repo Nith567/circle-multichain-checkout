@@ -2,7 +2,7 @@ export { CheckoutPage } from './components/CheckoutPage.js';
 export { useCrossChainTransfer } from './hooks/use-cross-chain-transfer.js';
 export type { TransferStep } from './hooks/use-cross-chain-transfer.js';
 export type { ChainId } from './lib/chains.js';
-export { CHAIN_IDS } from './lib/chains.js';
+export { CHAIN_IDS, CHAIN_EXPLORERS } from './lib/chains.js';
 export type { CheckoutPageProps } from './components/CheckoutPage.js';
 
 // Export UI components

@@ -4,7 +4,7 @@ import { createPublicClient, http, encodeFunctionData, TransactionExecutionError
 import axios from "axios";
 import { sepolia, avalancheFuji, baseSepolia, arbitrumSepolia, worldchainSepolia, sonicBlazeTestnet, lineaSepolia } from "viem/chains";
 import { useWalletClient, usePublicClient, useSwitchChain } from 'wagmi';
-import { CHAIN_IDS, CHAIN_IDS_TO_USDC_ADDRESSES, CHAIN_IDS_TO_TOKEN_MESSENGER, CHAIN_IDS_TO_MESSAGE_TRANSMITTER, DESTINATION_DOMAINS } from "../lib/chains";
+import { CHAIN_IDS, CHAIN_IDS_TO_USDC_ADDRESSES, CHAIN_IDS_TO_TOKEN_MESSENGER, CHAIN_IDS_TO_MESSAGE_TRANSMITTER, DESTINATION_DOMAINS, CHAIN_EXPLORERS } from "../lib/chains";
 const chains = {
     [CHAIN_IDS.ETH_SEPOLIA]: sepolia,
     [CHAIN_IDS.AVAX_FUJI]: avalancheFuji,
@@ -21,6 +21,7 @@ export function useCrossChainTransfer() {
     const [currentStep, setCurrentStep] = useState("idle");
     const [logs, setLogs] = useState([]);
     const [error, setError] = useState(null);
+    const [completedTx, setCompletedTx] = useState(null);
     const DEFAULT_DECIMALS = 6;
     // Map internal steps to user-friendly steps
     const mapToUserStep = (internalStep) => {
@@ -44,10 +45,12 @@ export function useCrossChainTransfer() {
     const setInternalStep = (step) => {
         setCurrentStep(mapToUserStep(step));
     };
-    const addLog = (message) => setLogs((prev) => [
-        ...prev,
-        message,
-    ]);
+    const addLog = (message, isImportant = false) => {
+        // Only add important logs for user-facing messages
+        if (isImportant) {
+            setLogs((prev) => [...prev, message]);
+        }
+    };
     const getPublicClient = (chainId) => {
         return createPublicClient({
             chain: chains[chainId],
@@ -56,7 +59,7 @@ export function useCrossChainTransfer() {
     };
     const approveUSDC = async (client, sourceChainId) => {
         setInternalStep("approving");
-        addLog("Preparing your payment...");
+        // No user-facing logs for approval step
         try {
             const tx = await client.sendTransaction({
                 to: CHAIN_IDS_TO_USDC_ADDRESSES[sourceChainId],
@@ -77,17 +80,16 @@ export function useCrossChainTransfer() {
                     args: [CHAIN_IDS_TO_TOKEN_MESSENGER[sourceChainId], 10000000000n],
                 }),
             });
-            addLog(`Payment preparation complete: ${tx}`);
             return tx;
         }
         catch (err) {
-            setError("Payment preparation failed");
+            setError("Payment failed - please try again");
             throw err;
         }
     };
     const burnUSDC = async (client, sourceChainId, amount, destinationChainId, destinationAddress, transferType) => {
         setInternalStep("burning");
-        addLog("Processing your cross-chain payment...");
+        // No user-facing logs for burning step
         try {
             const finalityThreshold = transferType === "fast" ? 1000 : 2000;
             const maxFee = amount - 1n;
@@ -130,22 +132,20 @@ export function useCrossChainTransfer() {
             return tx;
         }
         catch (err) {
-            setError("Payment processing failed");
+            setError("Payment failed - please try again");
             throw err;
         }
     };
     const retrieveAttestation = async (transactionHash, sourceChainId) => {
         setInternalStep("waiting-attestation");
-        addLog("Confirming your payment...");
+        // No user-facing logs during attestation wait
         const url = `https://iris-api-sandbox.circle.com/v2/messages/${DESTINATION_DOMAINS[sourceChainId]}?transactionHash=${transactionHash}`;
         while (true) {
             try {
                 const response = await axios.get(url);
                 if (response.data?.messages?.[0]?.status === "complete") {
-                    addLog("Payment confirmed!");
                     return response.data.messages[0];
                 }
-                addLog("Confirming payment on destination chain...");
                 await new Promise((resolve) => setTimeout(resolve, 5000));
             }
             catch (error) {
@@ -153,7 +153,7 @@ export function useCrossChainTransfer() {
                     await new Promise((resolve) => setTimeout(resolve, 5000));
                     continue;
                 }
-                setError("Payment confirmation failed");
+                setError("Payment failed - please try again");
                 throw error;
             }
         }
@@ -162,7 +162,7 @@ export function useCrossChainTransfer() {
         const MAX_RETRIES = 3;
         let retries = 0;
         setInternalStep("minting");
-        addLog("Finalizing your payment...");
+        // No user-facing logs during minting
         while (retries < MAX_RETRIES) {
             try {
                 const publicClient = await getPublicClient(destinationChainId);
@@ -192,7 +192,6 @@ export function useCrossChainTransfer() {
                 // Add 20% buffer to gas estimate
                 const gasWithBuffer = (gasEstimate * 120n) / 100n;
                 await switchChain({ chainId: destinationChainId });
-                addLog(`Switching to chain: ${destinationChainId}`);
                 const tx = await client.sendTransaction({
                     to: contractConfig.address,
                     data: encodeFunctionData({
@@ -204,20 +203,21 @@ export function useCrossChainTransfer() {
                     maxFeePerGas: feeData.maxFeePerGas,
                     maxPriorityFeePerGas: feeData.maxPriorityFeePerGas,
                 });
-                addLog(`Payment completed successfully: ${tx}`);
+                // Set completion data with explorer link
+                setCompletedTx({ hash: tx, chainId: destinationChainId });
+                addLog(`Payment completed successfully! View transaction: ${CHAIN_EXPLORERS[destinationChainId]}${tx}`, true);
                 setInternalStep("completed");
                 break;
             }
             catch (err) {
                 if (err instanceof TransactionExecutionError && retries < MAX_RETRIES) {
                     retries++;
-                    addLog(`Retry err: ${err} ${retries}/${MAX_RETRIES}...`);
+                    // No retry logs for users
                     await new Promise((resolve) => setTimeout(resolve, 2000 * retries));
                     continue;
                 }
                 const errorMessage = err instanceof Error ? err.message : String(err);
-                addLog(`Payment error: ${errorMessage}`);
-                setError(errorMessage);
+                setError("Payment failed - please try again");
                 throw err;
             }
         }
@@ -245,11 +245,17 @@ export function useCrossChainTransfer() {
         setCurrentStep("idle");
         setLogs([]);
         setError(null);
+        setCompletedTx(null);
+    };
+    const getExplorerLink = (hash, chainId) => {
+        return `${CHAIN_EXPLORERS[chainId]}${hash}`;
     };
     return {
         currentStep,
         logs,
         error,
+        completedTx,
+        getExplorerLink,
         executeMerchantPayment,
         reset,
     };

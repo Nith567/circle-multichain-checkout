@@ -20,13 +20,7 @@ export default function Home() {
     <WagmiProvider config={config}>
       <RainbowKitProvider>
         <main className="flex min-h-screen flex-col items-center justify-between p-24">
-          <CheckoutPage
-            merchantAddress="0xcfb31219238fe98eff27BBae2a00cEEaf0bE8BE5"
-            preferredChain={84532}
-            amount="99.99"
-            onSuccess={(txHash: string) => console.log("Payment successful:", txHash)}
-            onError={(error: Error) => console.error("Payment failed:", error)}
-          />
+          
         </main>
       </RainbowKitProvider>
     </WagmiProvider>

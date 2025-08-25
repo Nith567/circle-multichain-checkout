@@ -9,9 +9,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { Button } from './ui/button';
 import { ProgressSteps } from './progress-step';
 import { TransferLog } from './transfer-log';
+import { ExternalLink, RefreshCw, CheckCircle2 } from 'lucide-react';
 
 const CHAIN_OPTIONS = [
-  { id: CHAIN_IDS.ETH_SEPOLIA, name: 'Ethereum Sepolia', icon: '🔷' },
+  { id: CHAIN_IDS.ETH_SEPOLIA, name: 'Ethereum Sepolia', icon: '♦️' },
   { id: CHAIN_IDS.AVAX_FUJI, name: 'Avalanche Fuji', icon: '🔺' },
   { id: CHAIN_IDS.BASE_SEPOLIA, name: 'Base Sepolia', icon: '🔵' },
   { id: CHAIN_IDS.ARBITRUM_SEPOLIA, name: 'Arbitrum Sepolia', icon: '🔴' },
@@ -42,7 +43,7 @@ export function CheckoutPage({
 }: CheckoutPageProps) {
   const { address, isConnected } = useAccount();
   const { data: walletClient } = useWalletClient();
-  const { executeMerchantPayment, currentStep, logs, error, reset } = useCrossChainTransfer();
+  const { executeMerchantPayment, currentStep, logs, error, completedTx, getExplorerLink, reset } = useCrossChainTransfer();
   const [sourceChain, setSourceChain] = useState<ChainId>(CHAIN_IDS.ETH_SEPOLIA);
 
   const getChainInfo = (chainId: ChainId) => {
@@ -128,6 +129,25 @@ export function CheckoutPage({
           <ProgressSteps currentStep={currentStep} />
         </div>
 
+        {/* Success Display with Explorer Link */}
+        {currentStep === 'completed' && completedTx && (
+          <div className="bg-green-50 border border-green-200 rounded-xl p-6">
+            <div className="flex items-center space-x-3 mb-4">
+              <CheckCircle2 className="w-8 h-8 text-green-600" />
+              <h3 className="text-lg font-semibold text-green-800">Payment Completed Successfully!</h3>
+            </div>
+            <a
+              href={getExplorerLink(completedTx.hash, completedTx.chainId)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+            >
+              <span>View Transaction</span>
+              <ExternalLink className="w-4 h-4" />
+            </a>
+          </div>
+        )}
+
         {/* Error Display */}
         {error && (
           <div className="bg-red-50 border border-red-200 rounded-xl p-4">
@@ -139,8 +159,8 @@ export function CheckoutPage({
           </div>
         )}
 
-        {/* Transfer Logs */}
-        {logs.length > 0 && (
+        {/* Transfer Logs - Only show if not completed and has logs */}
+        {currentStep !== 'completed' && logs.length > 0 && (
           <div className="bg-gray-50 rounded-xl border border-gray-200">
             <TransferLog logs={logs} />
           </div>
@@ -149,21 +169,20 @@ export function CheckoutPage({
         {/* Action Button */}
         <Button 
           onClick={handlePayment}
-          disabled={isProcessing || !isConnected}
+          disabled={isProcessing || !isConnected || currentStep === 'completed'}
           className={cn(
             "w-full h-14 text-lg font-semibold transition-all duration-200",
-            isProcessing && "cursor-not-allowed",
-            currentStep === 'completed' && "bg-green-600 hover:bg-green-700"
+            currentStep === 'completed' && "bg-green-600 hover:bg-green-700 cursor-default"
           )}
         >
           {!isConnected 
-            ? '🔗 Connect Wallet to Pay' 
+            ? <><ExternalLink className="w-5 h-5 mr-2" /> Connect Wallet to Pay</> 
             : currentStep === 'completed'
-            ? '✅ Payment Completed'
+            ? <><CheckCircle2 className="w-5 h-5 mr-2" /> Payment Completed</>
             : currentStep === 'error'
-            ? '🔄 Try Again'
+            ? <><RefreshCw className="w-5 h-5 mr-2" /> Try Again</>
             : isProcessing
-            ? `🔄 Processing Payment...`
+            ? <><RefreshCw className="w-5 h-5 mr-2 animate-spin" /> Processing Payment...</>
             : `💳 Pay ${amount} USDC`
           }
         </Button>
@@ -173,9 +192,10 @@ export function CheckoutPage({
           <Button 
             onClick={reset}
             variant="outline"
-            className="w-full h-12"
+            className="w-full h-12 flex items-center justify-center"
           >
-            🔄 Start New Payment
+            <RefreshCw className="w-4 h-4 mr-2" />
+            Start New Payment
           </Button>
         )}
       </CardContent>

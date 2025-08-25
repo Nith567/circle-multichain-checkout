@@ -5,6 +5,11 @@ export declare function useCrossChainTransfer(): {
     currentStep: TransferStep;
     logs: string[];
     error: string | null;
+    completedTx: {
+        hash: string;
+        chainId: ChainId;
+    } | null;
+    getExplorerLink: (hash: string, chainId: ChainId) => string;
     executeMerchantPayment: (sourceChainId: ChainId, merchantAddress: string, preferredChainId: ChainId, amount: string) => Promise<{
         burnTx: `0x${string}`;
         mintTx: void;
