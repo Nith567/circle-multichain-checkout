@@ -17,7 +17,7 @@ import {
 import axios from "axios";
 import { sepolia, avalancheFuji, baseSepolia, arbitrumSepolia, worldchainSepolia, sonicBlazeTestnet, lineaSepolia } from "viem/chains";
 import { useWalletClient, usePublicClient, useSwitchChain } from 'wagmi'
-import { SupportedChainId } from "@/lib/constants";
+import { SupportedChainId } from "../lib/constants";
 import { 
   CHAIN_IDS, 
   type ChainId, 
@@ -25,7 +25,7 @@ import {
   CHAIN_IDS_TO_TOKEN_MESSENGER,
   CHAIN_IDS_TO_MESSAGE_TRANSMITTER,
   DESTINATION_DOMAINS
-} from "@/lib/chains";
+} from "../lib/chains";
 
 export type TransferStep =
   | "idle"

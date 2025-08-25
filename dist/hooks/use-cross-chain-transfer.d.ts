@@ -1,4 +1,4 @@
-import { type ChainId } from "@/lib/chains";
+import { type ChainId } from "../lib/chains";
 export type TransferStep = "idle" | "processing" | "confirming" | "completed" | "error";
 export type InternalTransferStep = "idle" | "approving" | "burning" | "waiting-attestation" | "minting" | "completed" | "error";
 export declare function useCrossChainTransfer(): {

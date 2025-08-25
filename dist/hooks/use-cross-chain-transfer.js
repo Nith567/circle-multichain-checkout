@@ -4,7 +4,7 @@ import { createPublicClient, http, encodeFunctionData, TransactionExecutionError
 import axios from "axios";
 import { sepolia, avalancheFuji, baseSepolia, arbitrumSepolia, worldchainSepolia, sonicBlazeTestnet, lineaSepolia } from "viem/chains";
 import { useWalletClient, usePublicClient, useSwitchChain } from 'wagmi';
-import { CHAIN_IDS, CHAIN_IDS_TO_USDC_ADDRESSES, CHAIN_IDS_TO_TOKEN_MESSENGER, CHAIN_IDS_TO_MESSAGE_TRANSMITTER, DESTINATION_DOMAINS } from "@/lib/chains";
+import { CHAIN_IDS, CHAIN_IDS_TO_USDC_ADDRESSES, CHAIN_IDS_TO_TOKEN_MESSENGER, CHAIN_IDS_TO_MESSAGE_TRANSMITTER, DESTINATION_DOMAINS } from "../lib/chains";
 const chains = {
     [CHAIN_IDS.ETH_SEPOLIA]: sepolia,
     [CHAIN_IDS.AVAX_FUJI]: avalancheFuji,
