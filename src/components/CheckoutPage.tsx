@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useAccount, useWalletClient } from 'wagmi';
+import { useAccount, useWalletClient, useSwitchChain } from 'wagmi';
 import { useCrossChainTransfer } from '../hooks/use-cross-chain-transfer';
 import { CHAIN_IDS, type ChainId } from '../lib/chains';
 import { cn } from '../lib/utils';
@@ -43,6 +43,7 @@ export function CheckoutPage({
 }: CheckoutPageProps) {
   const { address, isConnected } = useAccount();
   const { data: walletClient } = useWalletClient();
+  const { switchChain } = useSwitchChain();
   const { executeMerchantPayment, currentStep, logs, error, completedTx, getExplorerLink, reset } = useCrossChainTransfer();
   const [sourceChain, setSourceChain] = useState<ChainId>(CHAIN_IDS.ETH_SEPOLIA);
 
@@ -61,6 +62,15 @@ export function CheckoutPage({
 
     try {
       reset(); // Clear any previous errors
+      
+      // Auto-switch to the source chain before payment
+      try {
+        await switchChain({ chainId: sourceChain });
+      } catch (switchError) {
+        onError?.(new Error('Please switch to the source chain to continue'));
+        return;
+      }
+      
       const result = await executeMerchantPayment(
         sourceChain,
         merchantAddress,
@@ -83,15 +93,15 @@ export function CheckoutPage({
       </CardHeader>
       <CardContent className="space-y-8">
         {/* Payment Summary */}
-        <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-6 rounded-xl border border-blue-100">
+        <div className="bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 p-6 rounded-xl border border-blue-200 shadow-sm">
           <div className="flex justify-between items-center">
             <div>
-              <Label className="text-gray-600">Amount to Pay</Label>
-              <div className="text-3xl font-bold text-gray-900">{amount} USDC</div>
+              <Label className="text-gray-600 font-medium">Amount to Pay</Label>
+              <div className="text-3xl font-bold bg-gradient-to-r from-blue-700 to-purple-700 bg-clip-text text-transparent">{amount} USDC</div>
             </div>
             <div className="text-right">
-              <Label className="text-gray-600">Destination</Label>
-              <div className="flex items-center text-lg font-semibold text-gray-900">
+              <Label className="text-gray-600 font-medium">Destination</Label>
+              <div className="flex items-center text-lg font-semibold text-gray-800">
                 <span className="mr-2">{preferredChainInfo?.icon}</span>
                 {preferredChainInfo?.name || `Chain ${preferredChain}`}
               </div>
@@ -124,23 +134,23 @@ export function CheckoutPage({
         </div>
 
         {/* Progress Steps */}
-        <div className="bg-white p-6 rounded-xl border border-gray-200">
-          <h3 className="text-lg font-semibold mb-4 text-gray-900">Payment Progress</h3>
+        <div className="bg-gradient-to-br from-slate-50 to-gray-50 p-6 rounded-xl border border-slate-200 shadow-sm">
+          <h3 className="text-lg font-semibold mb-4 text-slate-800">Payment Progress</h3>
           <ProgressSteps currentStep={currentStep} />
         </div>
 
         {/* Success Display with Explorer Link */}
         {currentStep === 'completed' && completedTx && (
-          <div className="bg-green-50 border border-green-200 rounded-xl p-6">
+          <div className="bg-gradient-to-r from-emerald-50 via-green-50 to-teal-50 border border-emerald-200 rounded-xl p-6 shadow-lg">
             <div className="flex items-center space-x-3 mb-4">
-              <CheckCircle2 className="w-8 h-8 text-green-600" />
-              <h3 className="text-lg font-semibold text-green-800">Payment Completed Successfully!</h3>
+              <CheckCircle2 className="w-8 h-8 text-emerald-600" />
+              <h3 className="text-lg font-semibold text-emerald-800">Payment Completed Successfully!</h3>
             </div>
             <a
               href={getExplorerLink(completedTx.hash, completedTx.chainId)}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+              className="inline-flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-emerald-600 to-green-600 text-white rounded-lg hover:from-emerald-700 hover:to-green-700 transition-all duration-200 shadow-md hover:shadow-lg"
             >
               <span>View Transaction</span>
               <ExternalLink className="w-4 h-4" />
@@ -150,7 +160,7 @@ export function CheckoutPage({
 
         {/* Error Display */}
         {error && (
-          <div className="bg-red-50 border border-red-200 rounded-xl p-4">
+          <div className="bg-gradient-to-r from-red-50 via-rose-50 to-pink-50 border border-red-200 rounded-xl p-4 shadow-md">
             <div className="flex items-center space-x-2">
               <span className="text-red-500">❌</span>
               <span className="text-red-700 font-medium">Payment Failed</span>
@@ -161,7 +171,7 @@ export function CheckoutPage({
 
         {/* Transfer Logs - Only show if not completed and has logs */}
         {currentStep !== 'completed' && logs.length > 0 && (
-          <div className="bg-gray-50 rounded-xl border border-gray-200">
+          <div className="bg-gradient-to-br from-gray-50 to-slate-50 rounded-xl border border-gray-200 shadow-sm">
             <TransferLog logs={logs} />
           </div>
         )}
@@ -171,8 +181,8 @@ export function CheckoutPage({
           onClick={handlePayment}
           disabled={isProcessing || !isConnected || currentStep === 'completed'}
           className={cn(
-            "w-full h-14 text-lg font-semibold transition-all duration-200",
-            currentStep === 'completed' && "bg-green-600 hover:bg-green-700 cursor-default"
+            "w-full h-14 text-lg font-semibold transition-all duration-200 shadow-md hover:shadow-lg",
+            currentStep === 'completed' && "bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 cursor-default"
           )}
         >
           {!isConnected 
