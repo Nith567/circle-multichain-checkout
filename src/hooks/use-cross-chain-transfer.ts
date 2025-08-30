@@ -15,7 +15,7 @@ import {
   formatUnits,
 } from "viem";
 import axios from "axios";
-import { sepolia, avalancheFuji, baseSepolia, arbitrumSepolia, worldchainSepolia, sonicBlazeTestnet, lineaSepolia } from "viem/chains";
+import { sepolia, avalancheFuji, baseSepolia, arbitrumSepolia, worldchainSepolia, sonicBlazeTestnet, lineaSepolia, unichainSepolia } from "viem/chains";
 import { useWalletClient, usePublicClient, useSwitchChain } from 'wagmi'
 import { SupportedChainId } from "../lib/constants";
 import { 
@@ -53,6 +53,7 @@ const chains: Record<ChainId, Chain> = {
   [CHAIN_IDS.LINEA_SEPOLIA]: lineaSepolia,
   [CHAIN_IDS.ARBITRUM_SEPOLIA]: arbitrumSepolia,
   [CHAIN_IDS.WORLDCHAIN_SEPOLIA]: worldchainSepolia,
+  [CHAIN_IDS.UNICHAIN_SEPOLIA]:unichainSepolia
 };
 
 export function useCrossChainTransfer() {

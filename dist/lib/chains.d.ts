@@ -7,6 +7,7 @@ export declare const CHAIN_IDS: {
     readonly LINEA_SEPOLIA: 59144;
     readonly ARBITRUM_SEPOLIA: 421614;
     readonly WORLDCHAIN_SEPOLIA: 1666700000;
+    readonly UNICHAIN_SEPOLIA: 1301;
 };
 export type ChainId = typeof CHAIN_IDS[keyof typeof CHAIN_IDS];
 export declare enum SupportedChainId {
@@ -21,5 +22,4 @@ export declare const CHAIN_IDS_TO_USDC_ADDRESSES: Record<ChainId, Hex>;
 export declare const CHAIN_IDS_TO_TOKEN_MESSENGER: Record<ChainId, Hex>;
 export declare const CHAIN_IDS_TO_MESSAGE_TRANSMITTER: Record<ChainId, Hex>;
 export declare const DESTINATION_DOMAINS: Record<ChainId, number>;
-export declare const SUPPORTED_CHAINS: SupportedChainId[];
 export declare const CHAIN_EXPLORERS: Record<ChainId, string>;

@@ -19,6 +19,7 @@ const CHAIN_OPTIONS = [
   { id: CHAIN_IDS.LINEA_SEPOLIA, name: 'Linea Sepolia', icon: '⚡' },
   { id: CHAIN_IDS.WORLDCHAIN_SEPOLIA, name: 'Worldchain Sepolia', icon: '🌍' },
   { id: CHAIN_IDS.SONIC_BLAZE, name: 'Sonic Blaze', icon: '💨' },
+  { id: CHAIN_IDS.UNICHAIN_SEPOLIA, name: 'Unichain Sepolia', icon: '🩷' },
 ] as const;
 
 export interface CheckoutPageProps {
@@ -139,24 +140,33 @@ export function CheckoutPage({
           <ProgressSteps currentStep={currentStep} />
         </div>
 
-        {/* Success Display with Explorer Link */}
-        {currentStep === 'completed' && completedTx && (
-          <div className="bg-gradient-to-r from-emerald-50 via-green-50 to-teal-50 border border-emerald-200 rounded-xl p-6 shadow-lg">
-            <div className="flex items-center space-x-3 mb-4">
-              <CheckCircle2 className="w-8 h-8 text-emerald-600" />
-              <h3 className="text-lg font-semibold text-emerald-800">Payment Completed Successfully!</h3>
-            </div>
-            <a
-              href={getExplorerLink(completedTx.hash, completedTx.chainId)}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-emerald-600 to-green-600 text-white rounded-lg hover:from-emerald-700 hover:to-green-700 transition-all duration-200 shadow-lg hover:shadow-xl border border-emerald-500 font-medium"
-            >
-              <span>View Transaction</span>
-              <ExternalLink className="w-4 h-4" />
-            </a>
-          </div>
-        )}
+{/* Success Display with Explorer Link */}
+{currentStep === 'completed' && completedTx && (
+  <div className="bg-gradient-to-r from-emerald-50 via-green-50 to-teal-50 dark:from-emerald-900 dark:via-green-900 dark:to-teal-900 border border-emerald-200 dark:border-emerald-700 rounded-xl p-6 shadow-lg">
+    <div className="flex items-center space-x-3 mb-4">
+      <CheckCircle2 className="w-8 h-8 text-emerald-600 dark:text-emerald-400" />
+      <h3 className="text-lg font-semibold text-emerald-800 dark:text-emerald-100">
+        Payment Completed Successfully!
+      </h3>
+    </div>
+    <a
+      href={getExplorerLink(completedTx.hash, completedTx.chainId)}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="inline-flex items-center space-x-2 px-6 py-3 
+        bg-emerald-600 hover:bg-emerald-700 
+        dark:bg-emerald-500 dark:hover:bg-emerald-600
+        text-white rounded-lg 
+        transition-all duration-200 
+        shadow-lg hover:shadow-xl 
+        border border-emerald-500"
+    >
+      <span>View Transaction</span>
+      <ExternalLink className="w-4 h-4" />
+    </a>
+  </div>
+)}
+
 
         {/* Error Display */}
         {error && (

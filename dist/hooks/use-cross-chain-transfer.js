@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { createPublicClient, http, encodeFunctionData, TransactionExecutionError, parseUnits, } from "viem";
 import axios from "axios";
-import { sepolia, avalancheFuji, baseSepolia, arbitrumSepolia, worldchainSepolia, sonicBlazeTestnet, lineaSepolia } from "viem/chains";
+import { sepolia, avalancheFuji, baseSepolia, arbitrumSepolia, worldchainSepolia, sonicBlazeTestnet, lineaSepolia, unichainSepolia } from "viem/chains";
 import { useWalletClient, usePublicClient, useSwitchChain } from 'wagmi';
 import { CHAIN_IDS, CHAIN_IDS_TO_USDC_ADDRESSES, CHAIN_IDS_TO_TOKEN_MESSENGER, CHAIN_IDS_TO_MESSAGE_TRANSMITTER, DESTINATION_DOMAINS, CHAIN_EXPLORERS } from "../lib/chains";
 const chains = {
@@ -13,6 +13,7 @@ const chains = {
     [CHAIN_IDS.LINEA_SEPOLIA]: lineaSepolia,
     [CHAIN_IDS.ARBITRUM_SEPOLIA]: arbitrumSepolia,
     [CHAIN_IDS.WORLDCHAIN_SEPOLIA]: worldchainSepolia,
+    [CHAIN_IDS.UNICHAIN_SEPOLIA]: unichainSepolia
 };
 export function useCrossChainTransfer() {
     const { data: walletClient } = useWalletClient();

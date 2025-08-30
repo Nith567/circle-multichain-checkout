@@ -9,6 +9,7 @@ export const CHAIN_IDS = {
   LINEA_SEPOLIA: 59144,
   ARBITRUM_SEPOLIA: 421614,
   WORLDCHAIN_SEPOLIA: 1666700000,
+  UNICHAIN_SEPOLIA: 1301,
 } as const;
 
 export type ChainId = typeof CHAIN_IDS[keyof typeof CHAIN_IDS];
@@ -36,6 +37,7 @@ export const CHAIN_IDS_TO_USDC_ADDRESSES: Record<ChainId, Hex> = {
   [CHAIN_IDS.LINEA_SEPOLIA]: "0xFEce4462D57bD51A6A552365A011b95f0E16d9B7",
   [CHAIN_IDS.ARBITRUM_SEPOLIA]: "0x75faf114eafb1BDbe2F0316DF893fd58CE46AA4d",
   [CHAIN_IDS.WORLDCHAIN_SEPOLIA]: "0x66145f38cBAC35Ca6F1Dfb4914dF98F1614aeA88",
+  [CHAIN_IDS.UNICHAIN_SEPOLIA]: "0x31d0220469e10c4E71834a79b1f276d740d3768F",
 };
 
 export const CHAIN_IDS_TO_TOKEN_MESSENGER: Record<ChainId, Hex> = {
@@ -46,6 +48,7 @@ export const CHAIN_IDS_TO_TOKEN_MESSENGER: Record<ChainId, Hex> = {
   [CHAIN_IDS.LINEA_SEPOLIA]: "0x8fe6b999dc680ccfdd5bf7eb0974218be2542daa",
   [CHAIN_IDS.ARBITRUM_SEPOLIA]: "0x8fe6b999dc680ccfdd5bf7eb0974218be2542daa",
   [CHAIN_IDS.WORLDCHAIN_SEPOLIA]: "0x8fe6b999dc680ccfdd5bf7eb0974218be2542daa",
+  [CHAIN_IDS.UNICHAIN_SEPOLIA]: "0x8FE6B999Dc680CcFDD5Bf7EB0974218be2542DAA",
 };
 
 export const CHAIN_IDS_TO_MESSAGE_TRANSMITTER: Record<ChainId, Hex> = {
@@ -56,6 +59,7 @@ export const CHAIN_IDS_TO_MESSAGE_TRANSMITTER: Record<ChainId, Hex> = {
   [CHAIN_IDS.LINEA_SEPOLIA]: "0xe737e5cebeeba77efe34d4aa090756590b1ce275",
   [CHAIN_IDS.ARBITRUM_SEPOLIA]: "0xe737e5cebeeba77efe34d4aa090756590b1ce275",
   [CHAIN_IDS.WORLDCHAIN_SEPOLIA]: "0xe737e5cebeeba77efe34d4aa090756590b1ce275",
+  [CHAIN_IDS.UNICHAIN_SEPOLIA]: "0xE737e5cEBEEBa77EFE34D4aa090756590b1CE275",
 };
 
 export const DESTINATION_DOMAINS: Record<ChainId, number> = {
@@ -66,13 +70,10 @@ export const DESTINATION_DOMAINS: Record<ChainId, number> = {
   [CHAIN_IDS.LINEA_SEPOLIA]: 11,
   [CHAIN_IDS.ARBITRUM_SEPOLIA]: 3,
   [CHAIN_IDS.WORLDCHAIN_SEPOLIA]: 14,
+  [CHAIN_IDS.UNICHAIN_SEPOLIA]: 10,
 };
 
-export const SUPPORTED_CHAINS = [
-  SupportedChainId.ETH_SEPOLIA,
-  SupportedChainId.AVAX_FUJI,
-  SupportedChainId.BASE_SEPOLIA,
-];
+
 
 export const CHAIN_EXPLORERS: Record<ChainId, string> = {
   [CHAIN_IDS.ETH_SEPOLIA]: "https://sepolia.etherscan.io/tx/",
@@ -82,4 +83,5 @@ export const CHAIN_EXPLORERS: Record<ChainId, string> = {
   [CHAIN_IDS.LINEA_SEPOLIA]: "https://sepolia.lineascan.build/tx/",
   [CHAIN_IDS.ARBITRUM_SEPOLIA]: "https://sepolia.arbiscan.io/tx/",
   [CHAIN_IDS.WORLDCHAIN_SEPOLIA]: "https://worldchain-sepolia.explorer.alchemy.com/tx/",
+  [CHAIN_IDS.UNICHAIN_SEPOLIA]: "https://sepolia.unichain.org/tx/",
 };
