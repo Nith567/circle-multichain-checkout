@@ -18,6 +18,10 @@ A merchant-focused npm package for seamless cross-chain USDC payments using Circ
 - Ethereum Sepolia
 - Avalanche Fuji C-Chain  
 - Base Sepolia
+- Unichain
+- Sonic
+- Worldchain
+- Arbitrum Fuji
 
 ## Installation
 
