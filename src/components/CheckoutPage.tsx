@@ -142,10 +142,10 @@ export function CheckoutPage({
 
 {/* Success Display with Explorer Link */}
 {currentStep === 'completed' && completedTx && (
-  <div className="bg-gradient-to-r from-emerald-50 via-green-50 to-teal-50 dark:from-emerald-900 dark:via-green-900 dark:to-teal-900 border border-emerald-200 dark:border-emerald-700 rounded-xl p-6 shadow-lg">
+  <div className="bg-gradient-to-r from-emerald-500 via-green-500 to-teal-500 p-6 rounded-xl shadow-lg border-2 border-emerald-400">
     <div className="flex items-center space-x-3 mb-4">
-      <CheckCircle2 className="w-8 h-8 text-emerald-600 dark:text-emerald-400" />
-      <h3 className="text-lg font-semibold text-emerald-800 dark:text-emerald-100">
+      <CheckCircle2 className="w-8 h-8 text-white" />
+      <h3 className="text-lg font-semibold text-white">
         Payment Completed Successfully!
       </h3>
     </div>
@@ -153,13 +153,7 @@ export function CheckoutPage({
       href={getExplorerLink(completedTx.hash, completedTx.chainId)}
       target="_blank"
       rel="noopener noreferrer"
-      className="inline-flex items-center space-x-2 px-6 py-3 
-        bg-emerald-600 hover:bg-emerald-700 
-        dark:bg-emerald-500 dark:hover:bg-emerald-600
-        text-white rounded-lg 
-        transition-all duration-200 
-        shadow-lg hover:shadow-xl 
-        border border-emerald-500"
+      className="inline-flex items-center space-x-2 px-6 py-3 bg-gray-900 text-green-600 font-semibold rounded-lg hover:bg-gray-800 transition-all duration-200 shadow-lg hover:shadow-xl border-2 border-gray-700"
     >
       <span>View Transaction</span>
       <ExternalLink className="w-4 h-4" />
@@ -211,8 +205,7 @@ export function CheckoutPage({
         {(currentStep === 'completed' || currentStep === 'error') && (
           <Button 
             onClick={reset}
-            variant="outline"
-            className="w-full h-12 flex items-center justify-center"
+            className="w-full h-12 flex items-center justify-center bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-200"
           >
             <RefreshCw className="w-4 h-4 mr-2" />
             Start New Payment
