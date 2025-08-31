@@ -67,6 +67,7 @@ export function CheckoutPage({
       // Auto-switch to the source chain before payment
       try {
         await switchChain({ chainId: sourceChain });
+        await new Promise(resolve => setTimeout(resolve, 1000));
       } catch (switchError) {
         onError?.(new Error('Please switch to the source chain to continue'));
         return;
@@ -153,7 +154,7 @@ export function CheckoutPage({
       href={getExplorerLink(completedTx.hash, completedTx.chainId)}
       target="_blank"
       rel="noopener noreferrer"
-      className="inline-flex items-center space-x-2 px-6 py-3 bg-gray-900 text-green-600 font-semibold rounded-lg hover:bg-gray-800 transition-all duration-200 shadow-lg hover:shadow-xl border-2 border-gray-700"
+      className="inline-flex items-center space-x-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl"
     >
       <span>View Transaction</span>
       <ExternalLink className="w-4 h-4" />
