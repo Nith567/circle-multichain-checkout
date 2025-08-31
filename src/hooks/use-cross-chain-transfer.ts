@@ -105,16 +105,46 @@ export function useCrossChainTransfer() {
     });
   };
 
-  const approveUSDC = async (
+  const checkAndApproveUSDC = async (
     client: WalletClient<HttpTransport, Chain, Account>,
-    sourceChainId: ChainId
+    sourceChainId: ChainId,
+    amount: bigint
   ) => {
-    setInternalStep("approving");
-    // No user-facing logs for approval step
+    const publicClient = getPublicClient(sourceChainId);
+    const tokenMessenger = CHAIN_IDS_TO_TOKEN_MESSENGER[sourceChainId];
+    const usdcAddress = CHAIN_IDS_TO_USDC_ADDRESSES[sourceChainId];
 
+    // Check current allowance
     try {
+      const allowance = await publicClient.readContract({
+        address: usdcAddress,
+        abi: [
+          {
+            type: "function",
+            name: "allowance",
+            stateMutability: "view",
+            inputs: [
+              { name: "owner", type: "address" },
+              { name: "spender", type: "address" },
+            ],
+            outputs: [{ name: "", type: "uint256" }],
+          },
+        ],
+        functionName: "allowance",
+        args: [client.account.address, tokenMessenger],
+      }) as bigint;
+
+      // If allowance is sufficient, skip approval
+      if (allowance >= amount) {
+        addLog("Sufficient allowance found, skipping approval", false);
+        return null; // No transaction needed
+      }
+
+      // Need to approve
+      setInternalStep("approving");
+      
       const tx = await client.sendTransaction({
-        to: CHAIN_IDS_TO_USDC_ADDRESSES[sourceChainId] as `0x${string}`,
+        to: usdcAddress,
         data: encodeFunctionData({
           abi: [
             {
@@ -129,7 +159,7 @@ export function useCrossChainTransfer() {
             },
           ],
           functionName: "approve",
-          args: [CHAIN_IDS_TO_TOKEN_MESSENGER[sourceChainId], 10000000000n],
+          args: [tokenMessenger, amount * 2n], // Approve 2x amount for future transactions
         }),
       });
 
@@ -312,8 +342,13 @@ export function useCrossChainTransfer() {
     try {
       const numericAmount = parseUnits(amount, DEFAULT_DECIMALS)
       
-      // Use walletClient for transactions
-      await approveUSDC(walletClient as WalletClient<HttpTransport, Chain, Account>, sourceChainId)
+      // Check allowance and approve if needed
+      const approveTx = await checkAndApproveUSDC(
+        walletClient as WalletClient<HttpTransport, Chain, Account>, 
+        sourceChainId, 
+        numericAmount
+      )
+      
       const burnTx = await burnUSDC(
         walletClient as WalletClient<HttpTransport, Chain, Account>,
         sourceChainId,
@@ -324,7 +359,7 @@ export function useCrossChainTransfer() {
       )
       const attestation = await retrieveAttestation(burnTx, sourceChainId)
       const mintTx = await mintUSDC(walletClient as WalletClient<HttpTransport, Chain, Account>, preferredChainId, attestation)
-      return { burnTx, mintTx, attestation, sourceChain: sourceChainId, destinationChain: preferredChainId }
+      return { burnTx, mintTx, attestation, sourceChain: sourceChainId, destinationChain: preferredChainId, approveTx }
     } catch (error) {
       setInternalStep("error");
       const errorMessage = error instanceof Error ? error.message : "Unknown error";

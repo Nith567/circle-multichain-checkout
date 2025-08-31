@@ -16,6 +16,7 @@ export declare function useCrossChainTransfer(): {
         attestation: any;
         sourceChain: ChainId;
         destinationChain: ChainId;
+        approveTx: `0x${string}` | null;
     }>;
     reset: () => void;
 };
