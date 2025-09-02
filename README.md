@@ -14,11 +14,10 @@ A merchant-focused npm package for seamless cross-chain USDC payments using Circ
 - **Coming Soon**: Solana mainnet and Devnet support for complete cross-chain across all Major Chains
 
 ## Supported Chains
-
+- Unichain Sepolia
 - Ethereum Sepolia
 - Avalanche Fuji C-Chain  
 - Base Sepolia
-- Unichain
 - Sonic
 - Worldchain
 - Arbitrum Fuji
